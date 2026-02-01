@@ -1,0 +1,7 @@
+{
+  "weekStart": "1",
+  "timeFormat": "!!settings.12h!!",
+  "lineColorType": "mOutline",
+  "hourLineOpacity": 0.5,
+  "dayLineOpacity": 1
+}
