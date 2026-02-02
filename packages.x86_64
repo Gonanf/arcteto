@@ -127,39 +127,88 @@ xl2tpd
 
 # ArcTeto custom packages
 
+# Programming
+rust
+uv
+python
+bun
+clang
+
+# Shell
 fish
 btop
 fastfetch
-git
+
+# Libs
 base-devel
+xdg-desktop-portal
+evolution-data-server
+
+# CLI Utils
+git
 github-cli
-podman
-podman-compose
-podman-docker
-hyprland
-rust
-uv
-yazi
 paru
 brightnessctl
 imagemagick
-python
 cliphist
-xdg-desktop-portal
-evolution-data-server
-quickshell
-noctalia-shell
-ghostty
-fuzzel
 zip
 unzip
-bun
-clang
-dolphin
 tree
 ntp
 systemd
 parted
+pipewire
+wireplumber
+radeontop
+playerctl
+
+# Pods
+podman
+podman-compose
+podman-docker
+
+# Graphics
+hyprland
+quickshell
+noctalia-shell
+
+# Graphic Utils
+ghostty
+fuzzel
+
+# TUI File manager
+yazi
+
+# GUI File manager
+dolphin
+dolphin-plugins
+ark
+audiocd-kio
+baloo
+kio-admin
+kio-gdrive
+kompare
+ffmpegthumbs
+icoutils
+kdegraphics-thumbnailers
+kdesdk-thumbnailers
+kimageformats
+libappimage
+qt6-imageformats
+resvg
+taglib
+filelight
+qt5ct
+
+
+
+# AudioVisual
+obs-studio
+vlc
+vlc-plugins-all
+vlc-cli
+ristretto
+
 
 # Dependencies for zen-browser(?)
 pnpm
@@ -174,11 +223,4 @@ wasi-libc++abi
 xorg-server-xvfb
 yasm
 zen-browser
-
-# End
-
-pipewire
-wireplumber
-radeontop
-playerctl
 

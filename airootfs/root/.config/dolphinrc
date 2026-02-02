@@ -1,0 +1,24 @@
+MenuBar=Disabled
+
+[ContextMenu]
+ShowOpenTerminal=false
+
+[General]
+Version=202
+ViewPropsTimestamp=2026,1,22,17,31,22.885
+
+[InformationPanel]
+previewsAutoPlay=true
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=22
+
+[MainWindow]
+MenuBar=Disabled
+
+[PreviewSettings]
+Plugins=appimagethumbnail,blenderthumbnail,cursorthumbnail,mobithumbnail,audiothumbnail,textthumbnail,ffmpegthumbs,djvuthumbnail,gsthumbnail,rawthumbnail,directorythumbnail,kraorathumbnail,opendocumentthumbnail,windowsexethumbnail,glycin-heif,glycin-image-rs,glycin-jxl,glycin-svg,imagethumbnail,windowsimagethumbnail,exrthumbnail,jpegthumbnail,svgthumbnail,comicbookthumbnail,ebookthumbnail,pothumbnail
+
+[VersionControl]
+enabledPlugins=Subversion,Mercurial,Git,Dropbox,Bazaar

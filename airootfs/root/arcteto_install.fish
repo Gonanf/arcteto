@@ -82,6 +82,7 @@ if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] 
     set_keymap
 end
 
+# Disk and installation
 log Main "Picking the disk"
 wait_key
 
@@ -100,5 +101,7 @@ wipefs -af "/dev/$disk"
 sgdisk -Zo "/dev/$disk"
 
 set -l ram_size (grep MemTotal /proc/meminfo | awk '{print $2}')
-(echo g; echo n; echo ""; echo ""; echo +1G; echo n; echo ""; echo ""; echo "+$ram_size"K ; echo n; echo ""; echo ""; echo ""; echo w) | fdisk "/dev/$disk"
+parted -s "/dev/$disk" mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart CRYPTROOT 1025MiB 100%
+
+#(echo g; echo n; echo ""; echo ""; echo +1G; echo n; echo ""; echo ""; echo "+$ram_size"K ; echo n; echo ""; echo ""; echo ""; echo w) | fdisk "/dev/$disk"
 mkfs.btrfs "/dev/$disk"
