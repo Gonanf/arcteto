@@ -21,3 +21,5 @@ This is a distro with my configs for technical users, feel free to modify it and
 
 
 "
+source ./.arcteto_scripts/wait_key.fish
+wait_key

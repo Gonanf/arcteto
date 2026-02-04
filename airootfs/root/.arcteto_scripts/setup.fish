@@ -186,7 +186,7 @@ function install_arcteto
     cp -r /root/.config "/mnt/home/$username/"
 
     log Instalation "Setting up pacman"
-    sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf
+    sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
     set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer grub-btrfsd.service systemd-oomd
