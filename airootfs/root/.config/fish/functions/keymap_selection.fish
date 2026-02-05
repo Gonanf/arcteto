@@ -1,6 +1,3 @@
-source ~/.arcteto_scripts/log.fish
-source ~/.arcteto_scripts/wait_key.fish
-
 function recurse_path
     set -l folders (ls $argv[1])
 
@@ -25,7 +22,7 @@ function recurse_path
 
 end
 
-function set_keymap
+function keymap_selection
     log Keymap "Put 'Y' to diplay options, or write the name of the keymap directly"
     read -g keymap; or exit 1
     if [ $keymap = Y ]
@@ -41,5 +38,3 @@ function set_keymap
     end
 
 end
-
-set_keymap

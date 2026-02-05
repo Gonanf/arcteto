@@ -162,6 +162,11 @@ ntp
 parted
 pipewire
 wireplumber
+pipewire-alsa
+pipewire-audio
+pipewire-jack
+pipewire-pulse
+pipewire-v4l2
 radeontop
 playerctl
 snapper
@@ -171,6 +176,7 @@ sudo
 ddrescue
 ntfs-3g
 imagemagick
+pavucontrol
 gpart
 ghostty-terminfo
 screen

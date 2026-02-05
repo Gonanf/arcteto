@@ -1,5 +1,3 @@
-source ~/.arcteto_scripts/log.fish
-source ~/.arcteto_scripts/wait_key.fish
 #TODO: Add a greeter and auto login
 
 function prepare_disk
@@ -8,38 +6,38 @@ function prepare_disk
     if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
-    wipefs -af $disk
-    sgdisk -Zo $disk
+    sudo wipefs -af $disk
+    sudo sgdisk -Zo $disk
 
     log Instalation "Making the partition table..."
     set -l ram_size (grep MemTotal /proc/meminfo | awk '{print $2}')
-    if not parted -s $disk mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025Mib 100%
+    if not sudo parted -s $disk mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025Mib 100%
         log Instalation "Could not make the partition table"
         exit 1
     end
 
     log Instalation "Probing to the kernel"
-    partprobe $disk
+    sudo partprobe $disk
 
     set -g ESP /dev/disk/by-partlabel/ESP
 
     set -g ROOT /dev/disk/by-partlabel/ROOT
 
     log Instalation "Formatting the ESP partition"
-    mkfs.fat -F 32 $ESP
+    sudo mkfs.fat -F 32 $ESP
 
     log Instalation "Formatting the ROOT partition"
-    mkfs.btrfs $ROOT
+    sudo mkfs.btrfs $ROOT
 
     log Instalation "Creating the subvolumes"
-    mount $ROOT /mnt
+    sudo mount $ROOT /mnt
 
-    btrfs su cr /mnt/@snapshots
-    btrfs su cr /mnt/@home
-    btrfs su cr /mnt/@root
-    btrfs su cr /mnt/@
+    sudo btrfs su cr /mnt/@snapshots
+    sudo btrfs su cr /mnt/@home
+    sudo btrfs su cr /mnt/@root
+    sudo btrfs su cr /mnt/@
 
-    umount /mnt
+    sudo umount /mnt
 
     log Instalation "Succesfully formatted the disk!"
 end
@@ -48,23 +46,23 @@ function mount_partitions
     log Instalation "Mounting all the partitions and volumes"
 
     set -l mount_opt "ssd,noatime,compress-force=zstd:3,discard=async"
-    mount -o "$mount_opt",subvol=@ $ROOT /mnt
+    sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
 
     log Instalation "...Preparing mount Points..."
     mkdir -p /mnt/{home,root,.snapshots,boot}
 
     log Instalation "...Mounting Home..."
-    mount -o "$mount_opt",subvol=@home /mnt/home
+    sudo mount -o "$mount_opt",subvol=@home /mnt/home
 
     log Instalation "...Mounting Root..."
-    mount -o "$mount_opt",subvol=@root /mnt/root
-    chmod 750 /mnt/root
+    sudo mount -o "$mount_opt",subvol=@root /mnt/root
+    sudo chmod 750 /mnt/root
 
     log Instalation "...Mounting Snapshots..."
-    mount -o "$mount_opt",subvol=@snapshots /mnt/.snapshots
+    sudo mount -o "$mount_opt",subvol=@snapshots /mnt/.snapshots
 
     log Instalation "...Mounting Boot..."
-    mount "$ESP" /mnt/boot
+    sudo mount "$ESP" /mnt/boot
 end
 
 function install_arcteto
@@ -105,7 +103,7 @@ function install_arcteto
     test -n $val; and set -g user_passwd $val
 
     log Instalation "Installing the packages"
-    packstrap -K /mnt base linux linux-firmware linux-headers $microcode (awk '{print $1}' ~/custom_packages.x86_64)
+    sudo packstrap -K /mnt base linux linux-firmware linux-headers $microcode (awk '{print $1}' ~/custom_packages.x86_64)
 
     log Instalation "Setting up the hostname"
     echo $hostname >/mnt/etc/hostname
@@ -118,7 +116,7 @@ function install_arcteto
     echo "KEYMAP=$keymap" >/mnt/etc/vconsole.conf
 
     log Instalation "Generating fstab"
-    genfstab -U /mnt >>/mnt/etc/fstab
+    sudo genfstab -U /mnt >>/mnt/etc/fstab
 
     log Instalation "Setting up the hosts"
 
@@ -131,7 +129,7 @@ function install_arcteto
     echo "HOOKS=(systemd autodetect keyboard sd-vconsole modconf block filesystems)" >/mnt/etc/mkinitcpio.conf
 
     log Instalation "Chrooting into the system and setting up timezone, clock, snapshot"
-    arch-chroot /mnt /bin/fish -c "
+    sudo arch-chroot /mnt /bin/fish -c "
     ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime
 
     hwclock --systohc
@@ -155,11 +153,11 @@ function install_arcteto
     echo "root:$root_passwd" | arch-chroot /mnt chpasswd
 
     log Instalation "Setting up the user"
-    arch-chroot /mnt groupadd docker
+    sudo arch-chroot /mnt groupadd docker
     echo "%wheel ALL=(ALL:ALL) ALL" >/mnt/etc/sudoers.d/wheel
-    arch-chroot /mnt useradd -m -G wheel,docker -s /bin/bash "$username"
+    sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/bash "$username"
     echo "$username:$user_passwd" | arch-chroot /mnt chpasswd
-    arch-chroot /mnt xdg-user-dirs-update
+    sudo arch-chroot /mnt xdg-user-dirs-update
 
     log Instalation "Setting up the backups"
     mkdir /mnt/etc/pacman.d/hooks
@@ -194,10 +192,7 @@ function install_arcteto
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
     set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer grub-btrfsd.service systemd-oomd
     for service in $services
-        do
         systemctl enable "$service" --root=/mnt
-        done
-
     end
 
     log Instalation "Installed correctly"
@@ -221,15 +216,17 @@ function list_disks
     set -g disk (string split " " "$disks[$idx]")[1]
 end
 
-list_disks
+function setup
+    list_disks
 
-if [ $USER != root ]
-    log Instalation "Entering root mode"
-    su
+    #if [ $USER != root ]
+    #    log Instalation "Entering root mode"
+    #   su
+    #end
+
+    prepare_disk
+
+    mount_partitions
+
+    install_arcteto
 end
-
-prepare_disk
-
-mount_partitions
-
-install_arcteto
