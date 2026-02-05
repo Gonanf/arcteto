@@ -69,6 +69,7 @@ mkinitcpio-nfs-utils
 mmc-utils
 modemmanager
 mtools
+nano
 nbd
 ndisc6
 nfs-utils
@@ -124,6 +125,141 @@ wvdial
 xdg-utils
 xfsprogs
 xl2tpd
+zsh
+# ArcTeto custom packages
 
-sudo
+# Programming
+rust
+uv
+python
+bun
+clang
+
+# Shell
 fish
+btop
+fastfetch
+
+# Libs
+base-devel
+xdg-desktop-portal
+evolution-data-server
+alsa-utils
+btrfs-progs
+uwsm
+
+# CLI Utils
+git
+github-cli
+paru
+brightnessctl
+imagemagick
+cliphist
+zip
+unzip
+tree
+ntp
+parted
+pipewire
+wireplumber
+radeontop
+playerctl
+snapper
+snap-pac
+zram-generator
+sudo
+ddrescue
+ntfs-3g
+imagemagick
+gpart
+ghostty-terminfo
+screen
+tmux
+usbutils
+vim
+vpnc
+flatpak
+flatpak-xdg-utils
+nvme-cli
+
+#XDG
+xdg-utils
+xdg-desktop-portal
+xdg-desktop-portal-hyprland
+xdg-user-dirs
+
+#Fonts
+otf-atkinsonhyperlegiblemono-nerd
+
+# Pods
+docker
+docker-compose
+docker-buildx
+docker-machine
+podman
+podman-compose
+podman-docker
+
+# Graphics
+hyprland
+quickshell
+noctalia-shell
+
+# Graphic Utils
+ghostty
+fuzzel
+hyprpolkitagent
+
+# TUI File manager
+yazi
+
+# GUI File manager
+dolphin
+dolphin-plugins
+ark
+audiocd-kio
+baloo
+kio-admin
+kio-gdrive
+kompare
+ffmpegthumbs
+icoutils
+kdegraphics-thumbnailers
+kdesdk-thumbnailers
+kimageformats
+libappimage
+qt6-imageformats
+resvg
+taglib
+filelight
+qt5ct
+
+# Gaming
+steam
+gamescope
+wine
+lutris
+
+
+# AudioVisual
+obs-studio
+vlc
+vlc-plugins-all
+vlc-cli
+ristretto
+
+
+# Dependencies for zen-browser(?)
+pnpm
+rsync
+cbindgen
+imake
+llvm
+wasi-compiler-rt
+wasi-libc
+wasi-libc++
+wasi-libc++abi
+xorg-server-xvfb
+yasm
+zen-browser
+

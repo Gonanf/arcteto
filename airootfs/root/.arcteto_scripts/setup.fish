@@ -1,5 +1,6 @@
-source ./log.fish
-source ./wait_key.fish
+source ~/.arcteto_scripts/log.fish
+source ~/.arcteto_scripts/wait_key.fish
+#TODO: Add a greeter and auto login
 
 function prepare_disk
     # Based of Easy Arch
@@ -7,18 +8,18 @@ function prepare_disk
     if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
-    wipefs -af "/dev/$disk"
-    sgdisk -Zo "/dev/$disk"
+    wipefs -af $disk
+    sgdisk -Zo $disk
 
     log Instalation "Making the partition table..."
     set -l ram_size (grep MemTotal /proc/meminfo | awk '{print $2}')
-    if not parted -s "/dev/$disk" mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025Mib 100%
+    if not parted -s $disk mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025Mib 100%
         log Instalation "Could not make the partition table"
         exit 1
     end
 
     log Instalation "Probing to the kernel"
-    partprobe "/dev/$disk"
+    partprobe $disk
 
     set -g ESP /dev/disk/by-partlabel/ESP
 
@@ -185,6 +186,8 @@ function install_arcteto
     log Instalation "Copying the config"
     cp -r /root/.config "/mnt/home/$username/"
 
+    cp /root/.profile "/mnt/home/$username/.profile"
+
     log Instalation "Setting up pacman"
     sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
 
@@ -220,7 +223,7 @@ end
 
 list_disks
 
-if [$USER != "root"]
+if [ $USER != root ]
     log Instalation "Entering root mode"
     su
 end

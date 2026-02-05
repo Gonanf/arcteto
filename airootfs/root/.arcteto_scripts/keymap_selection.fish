@@ -1,5 +1,5 @@
-source ./log.fish
-source ./wait_key.fish
+source ~/.arcteto_scripts/log.fish
+source ~/.arcteto_scripts/wait_key.fish
 
 function recurse_path
     set -l folders (ls $argv[1])
