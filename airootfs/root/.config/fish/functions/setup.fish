@@ -53,17 +53,17 @@ function mount_partitions
     sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
 
     log Instalation "...Preparing mount Points..."
-    sudo mkdir -p /mnt/{home,root,.snapshots,boot}
+    sudo mkdir -p /mnt/{etc/{proc,sudoers.d},home,root,.snapshots,boot}
 
     log Instalation "...Mounting Home..."
-    sudo mount -o "$mount_opt",subvol=@home /mnt/home
+    sudo mount -o "$mount_opt",subvol=@home $ROOT /mnt/home
 
     log Instalation "...Mounting Root..."
-    sudo mount -o "$mount_opt",subvol=@root /mnt/root
+    sudo mount -o "$mount_opt",subvol=@root $ROOT /mnt/root
     sudo chmod 750 /mnt/root
 
     log Instalation "...Mounting Snapshots..."
-    sudo mount -o "$mount_opt",subvol=@snapshots /mnt/.snapshots
+    sudo mount -o "$mount_opt",subvol=@snapshots $ROOT /mnt/.snapshots
 
     log Instalation "...Mounting Boot..."
     sudo mount "$ESP" /mnt/boot
@@ -79,11 +79,11 @@ function install_arcteto
         set -l microcode amd-ucode
     end
 
-    set -g hostname arcteto
+    set -g HOST arcteto
 
     log Instalation "Enter the Hostname (Default $hostname)"
     read val; or exit 1
-    test -n $val; and set -g hostname $val
+    test -n $val; and set -g HOST $val
 
     set -g LANG es_AR.UTF-8
 
@@ -102,7 +102,7 @@ function install_arcteto
     test -n $val; and set -g username $val
 
     set -g user_passwd kasaneteto
-    log Instalation "Enter the user password (Default $root_passwd)"
+    log Instalation "Enter the user password (Default $user_passwd)"
     read val; or exit 1
     test -n $val; and set -g user_passwd $val
 
@@ -110,27 +110,27 @@ function install_arcteto
     sudo packstrap -K /mnt base linux linux-firmware linux-headers $microcode (awk '{print $1}' ~/custom_packages.x86_64)
 
     log Instalation "Setting up the hostname"
-    echo $hostname >/mnt/etc/hostname
+    sudo echo $HOST >/mnt/etc/hostname
 
     log Instalation "Setting up the locale"
-    sed -i "/^#$LANG/s/^#//" /mnt/etc/locale.gen
-    echo "LANG=$LANG" >/mnt/etc/locale.conf
+    sudo sed -i "/^#$LANG/s/^#//" /mnt/etc/locale.gen
+    sudo echo "LANG=$LANG" >/mnt/etc/locale.conf
 
     log Instalation "Setting up the keymap"
-    echo "KEYMAP=$keymap" >/mnt/etc/vconsole.conf
+    sudo echo "KEYMAP=$keymap" >/mnt/etc/vconsole.conf
 
     log Instalation "Generating fstab"
     sudo genfstab -U /mnt >>/mnt/etc/fstab
 
     log Instalation "Setting up the hosts"
 
-    echo "
+    sudo echo "
     127.0.0.1 localhost
     ::1 localhost
     127.0.1.1 $hostname.local $hostname" >/mnt/etc/hosts
 
     log Instalation "Setting up mkinitcpio"
-    echo "HOOKS=(systemd autodetect keyboard sd-vconsole modconf block filesystems)" >/mnt/etc/mkinitcpio.conf
+    sudo echo "HOOKS=(systemd autodetect keyboard sd-vconsole modconf block filesystems)" >/mnt/etc/mkinitcpio.conf
 
     log Instalation "Chrooting into the system and setting up timezone, clock, snapshot"
     sudo arch-chroot /mnt /bin/fish -c "
@@ -154,18 +154,18 @@ function install_arcteto
     "
 
     log Instalation "Setting up root password"
-    echo "root:$root_passwd" | arch-chroot /mnt chpasswd
+    sudo echo "root:$root_passwd" | sudo arch-chroot /mnt chpasswd
 
     log Instalation "Setting up the user"
     sudo arch-chroot /mnt groupadd docker
-    echo "%wheel ALL=(ALL:ALL) ALL" >/mnt/etc/sudoers.d/wheel
+    sudo echo "%wheel ALL=(ALL:ALL) ALL" >/mnt/etc/sudoers.d/wheel
     sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/bash "$username"
-    echo "$username:$user_passwd" | arch-chroot /mnt chpasswd
+    sudo echo "$username:$user_passwd" | sudo arch-chroot /mnt chpasswd
     sudo arch-chroot /mnt xdg-user-dirs-update
 
     log Instalation "Setting up the backups"
-    mkdir /mnt/etc/pacman.d/hooks
-    echo "
+    sudo mkdir -p /mnt/etc/pacman.d/hooks
+    sudo echo "
     [Trigger]
     Operation = Upgrade
     Operation = Install
@@ -181,22 +181,22 @@ function install_arcteto
     " >/mnt/etc/pacman.d/hooks/50-bootbackup.hook
 
     log Instalation "Setting up zram"
-    echo "
+    sudo echo "
     [zram0]
     zram-size = ram / 2" >/mnt/etc/systemd/zram-generator.conf
 
     log Instalation "Copying the config"
-    cp -r /root/.config "/mnt/home/$username/"
+    sudo cp -r /root/.config "/mnt/home/$username/"
 
-    cp /root/.profile "/mnt/home/$username/.profile"
+    sudo cp /root/.profile "/mnt/home/$username/.profile"
 
     log Instalation "Setting up pacman"
-    sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
+    sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
     set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer grub-btrfsd.service systemd-oomd
     for service in $services
-        systemctl enable "$service" --root=/mnt
+        sudo systemctl enable "$service" --root=/mnt
     end
 
     log Instalation "Installed correctly"
