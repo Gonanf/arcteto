@@ -2,10 +2,13 @@
 
 function prepare_disk
     # Based of Easy Arch
+
+    sudo umount /mnt
     log Instalation "Warning! This will format the disk and create a new layout, are you sure?"
     if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
+
     sudo wipefs -af $disk
     sudo sgdisk -Zo $disk
 
@@ -17,6 +20,7 @@ function prepare_disk
     end
 
     log Instalation "Probing to the kernel"
+
     sudo partprobe $disk
 
     set -g ESP /dev/disk/by-partlabel/ESP
@@ -27,7 +31,7 @@ function prepare_disk
     sudo mkfs.fat -F 32 $ESP
 
     log Instalation "Formatting the ROOT partition"
-    sudo mkfs.btrfs $ROOT
+    sudo mkfs.btrfs -f $ROOT
 
     log Instalation "Creating the subvolumes"
     sudo mount $ROOT /mnt
@@ -49,7 +53,7 @@ function mount_partitions
     sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
 
     log Instalation "...Preparing mount Points..."
-    mkdir -p /mnt/{home,root,.snapshots,boot}
+    sudo mkdir -p /mnt/{home,root,.snapshots,boot}
 
     log Instalation "...Mounting Home..."
     sudo mount -o "$mount_opt",subvol=@home /mnt/home
@@ -67,7 +71,7 @@ end
 
 function install_arcteto
     log Instalation "Figuring out the microcode"
-    if [ (grep vendor_id /proc/cpuinfo) = *"GenuineIntel" ]
+    if grep GenuineIntel /proc/cpuinfo -q
         log Instalation "Intel processor detected"
         set -l microcode intel-ucode
     else
