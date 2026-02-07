@@ -3,8 +3,9 @@
 function prepare_disk
     # Based of Easy Arch
 
-    sudo umount /mnt
+    sudo umount /mnt >/dev/null
     log Instalation "Warning! This will format the disk and create a new layout, are you sure?"
+    #TODO: Missing argument at index 3
     if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
@@ -53,7 +54,7 @@ function mount_partitions
     sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
 
     log Instalation "...Preparing mount Points..."
-    sudo mkdir -p /mnt/{etc/{proc,sudoers.d},home,root,.snapshots,boot}
+    sudo mkdir -p /mnt/{etc/sudoers.d,home,root,.snapshots,boot,proc,sys,systemd}
 
     log Instalation "...Mounting Home..."
     sudo mount -o "$mount_opt",subvol=@home $ROOT /mnt/home
@@ -107,30 +108,31 @@ function install_arcteto
     test -n $val; and set -g user_passwd $val
 
     log Instalation "Installing the packages"
-    sudo packstrap -K /mnt base linux linux-firmware linux-headers $microcode (awk '{print $1}' ~/custom_packages.x86_64)
+    sudo pacstrap -K /mnt base linux linux-firmware linux-headers $microcode (grep -v '^\s*#'  /etc/custom_packages.x86_64 | grep -v '^\s*$')
 
     log Instalation "Setting up the hostname"
-    sudo echo $HOST >/mnt/etc/hostname
+    echo $HOST | sudo tee /mnt/etc/hostname
 
     log Instalation "Setting up the locale"
+    sudo cp /etc/locale.gen /mnt/etc/
     sudo sed -i "/^#$LANG/s/^#//" /mnt/etc/locale.gen
-    sudo echo "LANG=$LANG" >/mnt/etc/locale.conf
+    echo "LANG=$LANG" | sudo tee /mnt/etc/locale.conf
 
     log Instalation "Setting up the keymap"
-    sudo echo "KEYMAP=$keymap" >/mnt/etc/vconsole.conf
+    echo "KEYMAP=$keymap" | sudo tee /mnt/etc/vconsole.conf
 
     log Instalation "Generating fstab"
     sudo genfstab -U /mnt >>/mnt/etc/fstab
 
     log Instalation "Setting up the hosts"
 
-    sudo echo "
+    echo "
     127.0.0.1 localhost
     ::1 localhost
-    127.0.1.1 $hostname.local $hostname" >/mnt/etc/hosts
+    127.0.1.1 $hostname.local $hostname" | sudo tee /mnt/etc/hosts
 
     log Instalation "Setting up mkinitcpio"
-    sudo echo "HOOKS=(systemd autodetect keyboard sd-vconsole modconf block filesystems)" >/mnt/etc/mkinitcpio.conf
+    echo "HOOKS=(systemd autodetect keyboard sd-vconsole modconf block filesystems)" | sudo tee /mnt/etc/mkinitcpio.conf
 
     log Instalation "Chrooting into the system and setting up timezone, clock, snapshot"
     sudo arch-chroot /mnt /bin/fish -c "
@@ -158,14 +160,14 @@ function install_arcteto
 
     log Instalation "Setting up the user"
     sudo arch-chroot /mnt groupadd docker
-    sudo echo "%wheel ALL=(ALL:ALL) ALL" >/mnt/etc/sudoers.d/wheel
+    echo "%wheel ALL=(ALL:ALL) ALL" | sudo tee /mnt/etc/sudoers.d/wheel
     sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/bash "$username"
     sudo echo "$username:$user_passwd" | sudo arch-chroot /mnt chpasswd
     sudo arch-chroot /mnt xdg-user-dirs-update
 
     log Instalation "Setting up the backups"
     sudo mkdir -p /mnt/etc/pacman.d/hooks
-    sudo echo "
+    echo "
     [Trigger]
     Operation = Upgrade
     Operation = Install
@@ -178,19 +180,21 @@ function install_arcteto
     Description = Backing up /boot...
     When = PostTransaction
     Exec = /usr/bin/rsync -a --delete /boot /.bootbackup
-    " >/mnt/etc/pacman.d/hooks/50-bootbackup.hook
+    " | sudo tee /mnt/etc/pacman.d/hooks/50-bootbackup.hook
 
     log Instalation "Setting up zram"
-    sudo echo "
+
+    echo "
     [zram0]
-    zram-size = ram / 2" >/mnt/etc/systemd/zram-generator.conf
+    zram-size = ram / 2" | sudo tee /mnt/etc/systemd/zram-generator.conf
 
     log Instalation "Copying the config"
-    sudo cp -r /root/.config "/mnt/home/$username/"
+    sudo cp -r ./.config "/mnt/home/$username/"
 
     sudo cp /root/.profile "/mnt/home/$username/.profile"
 
     log Instalation "Setting up pacman"
+    sudo cp /etc/pacman.conf /mnt/etc/
     sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
