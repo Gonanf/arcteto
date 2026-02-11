@@ -3,7 +3,12 @@
 function prepare_disk
     # Based of Easy Arch
 
-    sudo umount /mnt >/dev/null
+    sudo umount /mnt/home
+    sudo umount /mnt/.snapshots
+    sudo umount /mnt/root
+    sudo umount /mnt/boot
+    sudo umount /mnt/
+
     log Instalation "Warning! This will format the disk and create a new layout, are you sure?"
     #TODO: Missing argument at index 3
     if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
@@ -198,7 +203,7 @@ function install_arcteto
     sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
-    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer grub-btrfsd.service systemd-oomd
+    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer systemd-oomd
     for service in $services
         sudo systemctl enable "$service" --root=/mnt
     end
@@ -226,11 +231,6 @@ end
 
 function setup
     list_disks
-
-    #if [ $USER != root ]
-    #    log Instalation "Entering root mode"
-    #   su
-    #end
 
     prepare_disk
 

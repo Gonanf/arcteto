@@ -204,9 +204,7 @@ docker
 docker-compose
 docker-buildx
 docker-machine
-podman
-podman-compose
-podman-docker
+kubectl
 
 # Graphics
 hyprland
