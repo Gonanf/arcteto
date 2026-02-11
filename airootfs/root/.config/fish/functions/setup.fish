@@ -127,7 +127,7 @@ function install_arcteto
     echo "KEYMAP=$keymap" | sudo tee /mnt/etc/vconsole.conf
 
     log Instalation "Generating fstab"
-    sudo genfstab -U /mnt >>/mnt/etc/fstab
+    sudo genfstab -U /mnt | sudo tee /mnt/etc/fstab
 
     log Instalation "Setting up the hosts"
 
@@ -156,9 +156,23 @@ function install_arcteto
     mkdir /.snapshots
     mount -a
     chmod 750 /.snapshots
-
-    bootctl install
     "
+
+    log Instalation "Installing Systemd boot"
+    sudo arch-chroot -S /mnt /bin/fish -c "bootctl install"
+
+    log Instalation "Setting up loaders"
+    sudo echo "
+    title   ArcTeto
+linux   /vmlinuz-linux
+initrd  /initramfs-linux.img
+options root=PARTLABEL=ROOT rw" | sudo tee /mnt/boot/loader/entries/arcteto.conf
+
+    sudo echo "
+  default  arcteto.conf
+timeout  4
+console-mode max
+editor   no" | sudo tee /mnt/boot/loader/loader.conf
 
     log Instalation "Setting up root password"
     sudo echo "root:$root_passwd" | sudo arch-chroot /mnt chpasswd
