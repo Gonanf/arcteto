@@ -11,23 +11,25 @@ function prepare_disk
 
     log Instalation "Warning! This will format the disk and create a new layout, are you sure?"
     #TODO: Missing argument at index 3
-    if [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
+    if not set -ql argv[1]; and [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
 
     sudo wipefs -af $disk
-    sudo sgdisk -Zo $disk
 
     log Instalation "Making the partition table..."
     set -l ram_size (grep MemTotal /proc/meminfo | awk '{print $2}')
-    if not sudo parted -s $disk mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025Mib 100%
+    if not sudo parted -s $disk mklabel gpt mkpart ESP fat32 1MiB 1025MiB set 1 esp on mkpart ROOT 1025MiB 100%
         log Instalation "Could not make the partition table"
         exit 1
     end
 
     log Instalation "Probing to the kernel"
-
+    sleep 2
+    sudo sgdisk --change-name=1:ESP --change-name=2:ROOT $disk
     sudo partprobe $disk
+    sleep 1
+    sync
 
     set -g ESP /dev/disk/by-partlabel/ESP
 
@@ -38,6 +40,7 @@ function prepare_disk
 
     log Instalation "Formatting the ROOT partition"
     sudo mkfs.btrfs -f $ROOT
+    sync
 
     log Instalation "Creating the subvolumes"
     sudo mount $ROOT /mnt
@@ -49,6 +52,12 @@ function prepare_disk
 
     sudo umount /mnt
 
+    log Instalation "Verifying subvolumes exist"
+    sudo mount $ROOT /mnt
+    sudo btrfs subvolume list /mnt
+    sudo umount /mnt
+    sync
+
     log Instalation "Succesfully formatted the disk!"
 end
 
@@ -56,7 +65,11 @@ function mount_partitions
     log Instalation "Mounting all the partitions and volumes"
 
     set -l mount_opt "ssd,noatime,compress-force=zstd:3,discard=async"
-    sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
+    log Instalation "Mounting root subvolume: $ROOT with options: $mount_opt,subvol=@"
+    if not sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
+        log Instalation "Failed to mount root subvolume"
+        exit 1
+    end
 
     log Instalation "...Preparing mount Points..."
     sudo mkdir -p /mnt/{etc/sudoers.d,home,root,.snapshots,boot,proc,sys,systemd}
@@ -88,28 +101,28 @@ function install_arcteto
     set -g HOST arcteto
 
     log Instalation "Enter the Hostname (Default $hostname)"
-    read val; or exit 1
+    not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g HOST $val
 
     set -g LANG es_AR.UTF-8
 
     log Instalation "Enter the Language (Default $LANG)"
-    read val; or exit 1
+    not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g LANG $val
 
     set -g root_passwd iusearchbtw
     log Instalation "Enter the root password (Default $root_passwd)"
-    read val; or exit 1
+    not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g root_passwd $val
 
     set -g username Kasane
     log Instalation "Enter the user name (Default $username)"
-    read val; or exit 1
+    not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g username $val
 
     set -g user_passwd kasaneteto
     log Instalation "Enter the user password (Default $user_passwd)"
-    read val; or exit 1
+    not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g user_passwd $val
 
     log Instalation "Installing the packages"
@@ -129,6 +142,10 @@ function install_arcteto
     log Instalation "Generating fstab"
     sudo genfstab -U /mnt | sudo tee /mnt/etc/fstab
 
+    # log Instalation "Adding subvolume entries to fstab"
+    # echo "PARTLABEL=ROOT /home btrfs $mount_opt,subvol=@home 0 0" | sudo tee -a /mnt/etc/fstab
+    # echo "PARTLABEL=ROOT /root btrfs $mount_opt,subvol=@root 0 0" | sudo tee -a /mnt/etc/fstab
+    # echo "PARTLABEL=ROOT /.snapshots btrfs $mount_opt,subvol=@snapshots 0 0" | sudo tee -a /mnt/etc/fstab
     log Instalation "Setting up the hosts"
 
     echo "
@@ -166,21 +183,20 @@ function install_arcteto
     title   ArcTeto
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options root=PARTLABEL=ROOT rw" | sudo tee /mnt/boot/loader/entries/arcteto.conf
+    options root=PARTLABEL=ROOT rw rootflags=subvol=@ add_efi_memmap" | sudo tee /mnt/boot/loader/entries/arcteto.conf
 
     sudo echo "
   default  arcteto.conf
 timeout  4
-console-mode max
-editor   no" | sudo tee /mnt/boot/loader/loader.conf
+console-mode max" | sudo tee /mnt/boot/loader/loader.conf
 
     log Instalation "Setting up root password"
-    sudo echo "root:$root_passwd" | sudo arch-chroot /mnt chpasswd
+    echo "root:$root_passwd" | sudo arch-chroot /mnt chpasswd
 
     log Instalation "Setting up the user"
     sudo arch-chroot /mnt groupadd docker
     echo "%wheel ALL=(ALL:ALL) ALL" | sudo tee /mnt/etc/sudoers.d/wheel
-    sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/bash "$username"
+    sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/fish "$username"
     sudo echo "$username:$user_passwd" | sudo arch-chroot /mnt chpasswd
     sudo arch-chroot /mnt xdg-user-dirs-update
 
@@ -244,11 +260,17 @@ function list_disks
 end
 
 function setup
-    list_disks
+    argparse d/disk y/yes -- $argv; or return
 
-    prepare_disk
+    if not set -ql _flag_disk
+        list_disks
+    else
+        set -g disk $_flag_disk
+    end
 
-    mount_partitions
+    prepare_disk $_flag_yes
 
-    install_arcteto
+    mount_partitions $_flag_yes
+
+    install_arcteto $_flag_yes
 end

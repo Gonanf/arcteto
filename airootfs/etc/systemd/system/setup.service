@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup Shell on tty1
+After=systemd-user-sessions.service
+Wants=setup.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/chroot /mnt /bin/fish -c "source /root/.config/fish/functions/setup.fish; setup"
+
+[Install]
+WantedBy=setup.target

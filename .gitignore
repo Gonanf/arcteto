@@ -2,3 +2,4 @@ local/repo/*
 work
 out
 .temp.raw
+.archiso-tmp

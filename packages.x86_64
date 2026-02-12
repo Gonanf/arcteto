@@ -215,6 +215,18 @@ noctalia-shell
 ghostty
 fuzzel
 hyprpolkitagent
+hyprsunset
+grim
+slurp
+wl-clipboard
+jq
+libnotify
+tesseract
+swappy
+wf-recorder
+hyprpicker
+matugen
+hyprshot
 
 # TUI File manager
 yazi

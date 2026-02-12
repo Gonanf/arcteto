@@ -1,0 +1,7 @@
+[Unit]
+Description=Setup Environment
+Requires=basic.target
+After=basic.target
+
+[Install]
+Alias=default.target
