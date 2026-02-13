@@ -24,6 +24,9 @@ uwsm
 git
 github-cli
 paru
+nvim
+yt-dlp
+libnewt
 brightnessctl
 imagemagick
 cliphist
@@ -31,6 +34,8 @@ zip
 unzip
 tree
 ntp
+man-db
+openssh
 parted
 pipewire
 wireplumber
@@ -99,6 +104,7 @@ wf-recorder
 hyprpicker
 matugen
 hyprshot
+gnome-disk-utility
 
 # TUI File manager
 yazi

@@ -1,4 +1,7 @@
 #TODO: Add a greeter and auto login
+#TODO: Fix keymap
+#TODO[X]: Fix xdg-user-dirs-update
+#TODO: Fix networking
 
 function prepare_disk
     # Based of Easy Arch
@@ -10,7 +13,6 @@ function prepare_disk
     sudo umount /mnt/
 
     log Instalation "Warning! This will format the disk and create a new layout, are you sure?"
-    #TODO: Missing argument at index 3
     if not set -ql argv[1]; and [ (read -p 'set_color green; echo -n read;set_color normal; echo -n "> [y/n] "'; or exit 1) != y ]
         exit 1
     end
@@ -65,7 +67,8 @@ function mount_partitions
     log Instalation "Mounting all the partitions and volumes"
 
     set -l mount_opt "ssd,noatime,compress-force=zstd:3,discard=async"
-    log Instalation "Mounting root subvolume: $ROOT with options: $mount_opt,subvol=@"
+
+    log Instalation "Mounting / subvolume: $ROOT with options: $mount_opt,subvol=@"
     if not sudo mount -o "$mount_opt",subvol=@ $ROOT /mnt
         log Instalation "Failed to mount root subvolume"
         exit 1
@@ -115,7 +118,7 @@ function install_arcteto
     not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g root_passwd $val
 
-    set -g username Kasane
+    set -g username teto
     log Instalation "Enter the user name (Default $username)"
     not set -ql argv[1]; and read val; or exit 1
     test -n $val; and set -g username $val
@@ -136,16 +139,16 @@ function install_arcteto
     sudo sed -i "/^#$LANG/s/^#//" /mnt/etc/locale.gen
     echo "LANG=$LANG" | sudo tee /mnt/etc/locale.conf
 
+    set -q keymap; or set -g keymap la-latin1
     log Instalation "Setting up the keymap"
-    echo "KEYMAP=$keymap" | sudo tee /mnt/etc/vconsole.conf
+    echo "
+    KEYMAP=$keymap
+    XKBLAYOUT=latam
+    XKBMODEL=pc105" | sudo tee /mnt/etc/vconsole.conf
 
     log Instalation "Generating fstab"
     sudo genfstab -U /mnt | sudo tee /mnt/etc/fstab
 
-    # log Instalation "Adding subvolume entries to fstab"
-    # echo "PARTLABEL=ROOT /home btrfs $mount_opt,subvol=@home 0 0" | sudo tee -a /mnt/etc/fstab
-    # echo "PARTLABEL=ROOT /root btrfs $mount_opt,subvol=@root 0 0" | sudo tee -a /mnt/etc/fstab
-    # echo "PARTLABEL=ROOT /.snapshots btrfs $mount_opt,subvol=@snapshots 0 0" | sudo tee -a /mnt/etc/fstab
     log Instalation "Setting up the hosts"
 
     echo "
@@ -175,6 +178,14 @@ function install_arcteto
     chmod 750 /.snapshots
     "
 
+    log Instalation "Setting up autologin into hyprland"
+    sudo mkdir -p /mnt/etc/systemd/system/getty@tty1.service.d/
+    sudo touch /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+    echo "
+    [Service]
+    ExecStart=
+    ExecStart=-/usr/bin/agetty --autologin $username --noclear %I \$TERM" | sudo tee /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+
     log Instalation "Installing Systemd boot"
     sudo arch-chroot -S /mnt /bin/fish -c "bootctl install"
 
@@ -198,7 +209,7 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     echo "%wheel ALL=(ALL:ALL) ALL" | sudo tee /mnt/etc/sudoers.d/wheel
     sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/fish "$username"
     sudo echo "$username:$user_passwd" | sudo arch-chroot /mnt chpasswd
-    sudo arch-chroot /mnt xdg-user-dirs-update
+    # sudo arch-chroot /mnt xdg-user-dirs-update
 
     log Instalation "Setting up the backups"
     sudo mkdir -p /mnt/etc/pacman.d/hooks
@@ -225,18 +236,25 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
 
     log Instalation "Copying the config"
     sudo cp -r ./.config "/mnt/home/$username/"
+    sudo cp ./.profile "/mnt/home/$username/.profile"
 
-    sudo cp /root/.profile "/mnt/home/$username/.profile"
+    log Instalation "Owning config files"
+    sudo arch-chroot /mnt chown -R $username:$username /mnt/home/$username/.config
+    sudo arch-chroot /mnt chown -R $username:$username /mnt/home/$username/.profile
 
     log Instalation "Setting up pacman"
-    sudo cp /etc/pacman.conf /mnt/etc/
-    sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/;s/^#\[multilib\]/[multilib]/;s/^[[:space:]]*#([[:space:]]*Include[[:space:]]*=[[:space:]]*\/etc\/pacman.d\/mirrorlist)/\1/' /mnt/etc/pacman.conf
+    # sudo cp /etc/pacman.conf /mnt/etc/
+    sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf
+    echo "
+    [multilib]
+    Include = /etc/pacman.d/mirrorlist" | sudo tee -a /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
-    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer systemd-oomd
+    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer systemd-oomd systemd-networkd systemd-resolver sshd
     for service in $services
         sudo systemctl enable "$service" --root=/mnt
     end
+    sudo systemctl --user enable xdg-user-dirs --root=/mnt
 
     log Instalation "Installed correctly"
 end

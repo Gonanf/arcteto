@@ -152,6 +152,7 @@ uwsm
 git
 github-cli
 paru
+libnewt
 brightnessctl
 imagemagick
 cliphist
@@ -159,6 +160,8 @@ zip
 unzip
 tree
 ntp
+man-db
+openssh
 parted
 pipewire
 wireplumber
