@@ -19,7 +19,16 @@ Item {
   readonly property bool pillDirection: BarService.getPillDirection(root)
 
   readonly property var mainInstance: pluginApi?.mainInstance
-  readonly property bool isActive: mainInstance && (mainInstance.timerRunning || mainInstance.timerElapsedSeconds > 0 || mainInstance.timerRemainingSeconds > 0)
+  readonly property bool isActive: mainInstance && (mainInstance.cdRunning || mainInstance.swRunning || mainInstance.swElapsedSeconds > 0 || mainInstance.cdRemainingSeconds > 0 || mainInstance.cdSoundPlaying)
+
+  property var cfg: pluginApi?.pluginSettings || ({})
+  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+
+  readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
+  readonly property color iconColor: Color.resolveColorKey(iconColorKey)
+
+  readonly property string textColorKey: cfg.textColor ?? defaults.textColor ?? "none"
+  readonly property color textColor: Color.resolveColorKey(textColorKey)
 
   // Bar positioning properties
   readonly property string screenName: screen ? screen.name : ""
@@ -30,9 +39,9 @@ Item {
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
   readonly property real contentWidth: {
-    if (isVertical) return Style.capsuleHeight
+    if (isVertical) return root.capsuleHeight
     if (isActive) return contentRow.implicitWidth + Style.marginM * 2
-    return Style.capsuleHeight
+    return root.capsuleHeight
   }
   readonly property real contentHeight: root.capsuleHeight
 
@@ -56,12 +65,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: {
-      if (mainInstance && (mainInstance.timerRunning || mainInstance.timerSoundPlaying)) {
-        return Style.capsuleColor
-      }
-      return mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
-    }
+    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -79,30 +83,21 @@ Item {
           return "hourglass"
         }
         applyUiScale: false
-        color: {
-          if (mainInstance && (mainInstance.timerRunning || mainInstance.timerSoundPlaying)) {
-            return Color.mPrimary
-          }
-          return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
-        }
+        color: mouseArea.containsMouse ? Color.mOnHover : root.iconColor
       }
 
       NText {
-        visible: !isVertical && mainInstance && (mainInstance.timerRunning || mainInstance.timerElapsedSeconds > 0 || mainInstance.timerRemainingSeconds > 0)
+        visible: !isVertical && mainInstance && (mainInstance.cdRunning || mainInstance.swRunning || mainInstance.swElapsedSeconds > 0 || mainInstance.cdRemainingSeconds > 0 || mainInstance.cdSoundPlaying)
         family: Settings.data.ui.fontFixed
-        pointSize: Style.barFontSize
+        pointSize: root.barFontSize
+        font.weight: Style.fontWeightBold
+        color: mouseArea.containsMouse ? Color.mOnHover : root.textColor
         text: {
           if (!mainInstance) return ""
           if (mainInstance.timerStopwatchMode) {
             return formatTime(mainInstance.timerElapsedSeconds)
           }
           return formatTime(mainInstance.timerRemainingSeconds)
-        }
-        color: {
-          if (mainInstance && (mainInstance.timerRunning || mainInstance.timerSoundPlaying)) {
-            return Color.mPrimary
-          }
-          return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
         }
       }
     }
@@ -116,7 +111,10 @@ Item {
 
       if (mainInstance) {
         // Pause / Resume & Reset
-        if (mainInstance.timerRunning || mainInstance.timerElapsedSeconds > 0 || mainInstance.timerRemainingSeconds > 0) {
+        const modeActive = mainInstance.timerStopwatchMode
+          ? (mainInstance.swRunning || mainInstance.swElapsedSeconds > 0)
+          : (mainInstance.cdRunning || mainInstance.cdRemainingSeconds > 0 || mainInstance.cdSoundPlaying);
+        if (modeActive) {
           items.push({
             "label": mainInstance.timerRunning ? pluginApi.tr("panel.pause") : pluginApi.tr("panel.resume"),
             "action": "toggle",

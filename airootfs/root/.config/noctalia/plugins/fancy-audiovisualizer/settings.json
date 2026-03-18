@@ -5,7 +5,7 @@
   "ringOpacity": 0.8,
   "bloomIntensity": 0.5,
   "visualizationMode": 5,
-  "waveThickness": 1,
+  "waveThickness": 1.4000000000000001,
   "innerDiameter": 0.7,
   "fadeWhenIdle": true,
   "useCustomColors": false,

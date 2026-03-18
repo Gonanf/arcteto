@@ -1,0 +1,54 @@
+# snapper config template
+
+# subvolume to snapshot
+SUBVOLUME="/"
+
+# filesystem type
+FSTYPE="btrfs"
+
+# snapshot and backup directory
+SNAPSHOT_DIR=".snapshots"
+
+# btrfs quota group (QGROUP)
+QGROUP=""
+
+# fraction of free space that snapshots may use
+SPACE_LIMIT="0.5"
+
+# fraction of free space that snapshots must have free
+FREE_LIMIT="0.2"
+
+# create hourly snapshots
+TIMELINE_CREATE="yes"
+
+# cleanup hourly snapshots after some time
+TIMELINE_CLEANUP="yes"
+
+# limits for timeline snapshots
+TIMELINE_LIMIT_HOURLY="10"
+TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_WEEKLY="0"
+TIMELINE_LIMIT_MONTHLY="0"
+TIMELINE_LIMIT_YEARLY="0"
+
+# limits for number snapshots
+NUMBER_LIMIT="10"
+NUMBER_LIMIT_IMPORTANT="5"
+
+# allow users to configure snapper
+ALLOW_USERS=""
+
+# sync ACL when creating snapshots
+SYNC_ACL="no"
+
+# start/stop cron jobs for timeline and cleanup
+BACKGROUND_COMPARISON="yes"
+
+# empty for no compression, or lzo, zstd
+COMPRESSION=""
+
+# parameters for snapper-rollback
+ROLLBACK_NO_CLEANUP="no"
+
+# parameters for snapper-gui
+GUI_LIMITS="yes"

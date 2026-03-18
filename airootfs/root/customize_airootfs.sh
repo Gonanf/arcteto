@@ -6,3 +6,11 @@ cp -r /root/Imágenes /home/teto/Pictures
 chown -R teto /home/teto/.config
 chown -R teto /home/teto/Pictures
 locale-gen
+
+# Initialize keyring
+pacman-key --init
+pacman-key --populate archlinux
+pacman-key --refresh-keys
+
+# Enable systemd-timesyncd
+systemctl enable systemd-timesyncd.service

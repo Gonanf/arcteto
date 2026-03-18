@@ -176,6 +176,14 @@ function install_arcteto
     mkdir /.snapshots
     mount -a
     chmod 750 /.snapshots
+
+    umount /home/.snapshots
+    rm -r /home/.snapshots
+    snapper --no-dbus -c home create-config /home
+    btrfs subvolume delete /home/.snapshots
+    mkdir /home/.snapshots
+    mount -a
+    chmod 750 /home/.snapshots
     "
 
     log Instalation "Setting up autologin into hyprland"
