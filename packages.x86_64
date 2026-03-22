@@ -152,6 +152,8 @@ uwsm
 git
 github-cli
 paru
+nvim
+yt-dlp
 libnewt
 brightnessctl
 imagemagick
@@ -180,7 +182,6 @@ zram-generator
 sudo
 ddrescue
 ntfs-3g
-imagemagick
 pavucontrol
 gpart
 ghostty-terminfo
@@ -195,7 +196,6 @@ nvme-cli
 
 #XDG
 xdg-utils
-xdg-desktop-portal
 xdg-desktop-portal-hyprland
 xdg-user-dirs
 
@@ -213,6 +213,10 @@ kubectl
 hyprland
 quickshell
 noctalia-shell
+rocm-smi
+vulkan-radeon
+vulkan-intel
+intel-gpu-tools
 
 # Graphic Utils
 ghostty
@@ -230,6 +234,8 @@ wf-recorder
 hyprpicker
 matugen
 hyprshot
+gnome-disk-utility
+flameshot
 
 # TUI File manager
 yazi

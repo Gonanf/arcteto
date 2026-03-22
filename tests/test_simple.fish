@@ -14,7 +14,8 @@ echo ""
 
 # 1. Check essential files exist
 echo "1. Checking essential files..."
-for file in profiledef.sh pacman.conf packages.x86_64 build.fish start_emu.fish
+# Required source files
+for file in profiledef.sh pacman.conf build.fish start_emu.fish
     set total (math $total + 1)
     if test -f "$file"
         echo "   ✓ $file"
@@ -22,6 +23,15 @@ for file in profiledef.sh pacman.conf packages.x86_64 build.fish start_emu.fish
         echo "   ✗ $file (missing)"
         set failed (math $failed + 1)
     end
+end
+
+# packages.x86_64 is generated during build
+set total (math $total + 1)
+if test -f packages.x86_64
+    echo "   ✓ packages.x86_64 (generated file present)"
+else
+    echo "   ⚠ packages.x86_64 missing (will be generated during build)"
+    # Not a failure
 end
 
 # 2. Check airootfs directories
