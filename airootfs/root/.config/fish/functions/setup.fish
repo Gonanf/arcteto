@@ -1,8 +1,3 @@
-#TODO: Add a greeter and auto login
-#TODO: Fix keymap
-#TODO[X]: Fix xdg-user-dirs-update
-#TODO: Fix networking
-
 function prepare_disk
     # Based of Easy Arch
 
@@ -218,7 +213,6 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     echo "%wheel ALL=(ALL:ALL) ALL" | sudo tee /mnt/etc/sudoers.d/wheel
     sudo arch-chroot /mnt useradd -m -G wheel,docker -s /bin/fish "$username"
     sudo echo "$username:$user_passwd" | sudo arch-chroot /mnt chpasswd
-    # sudo arch-chroot /mnt xdg-user-dirs-update
 
     log Instalation "Setting up the backups"
     sudo mkdir -p /mnt/etc/pacman.d/hooks
@@ -248,16 +242,13 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     sudo cp ./.profile "/mnt/home/$username/.profile"
 
     log Instalation "Owning config files"
-    # Fix home directory permissions
     sudo arch-chroot /mnt chown $username:users /home/$username
     sudo arch-chroot /mnt chmod 700 /home/$username
-    # Fix config and profile ownership
     sudo arch-chroot /mnt chown -R $username:users /home/$username/.config
     sudo arch-chroot /mnt chown $username:users /home/$username/.profile
     sudo arch-chroot /mnt chmod -R 755 /home/$username/.config
 
     log Instalation "Setting up pacman"
-    # sudo cp /etc/pacman.conf /mnt/etc/
     sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf
     echo "
     [multilib]
@@ -272,21 +263,17 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
 
     log Instalation "Applying system fixes"
     sudo arch-chroot /mnt /bin/fish -c "
-    # Symlink nerd font config for proper font rendering
     mkdir -p /etc/fonts/conf.d
     ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf /etc/fonts/conf.d/10-nerd-font-symbols.conf
 
-    # Fix /boot permissions for random seed security
     if [ -d /boot ]; then
         chmod 700 /boot 2>/dev/null || true
     fi
 
-    # Run kbuildsycoca6 to rebuild application menu database
     if command -v kbuildsycoca6 &> /dev/null; then
         XDG_MENU_PREFIX=arch- kbuildsycoca6 || true
     fi
 
-    # Enable systemd-timesyncd
     systemctl enable systemd-timesyncd.service
     "
 

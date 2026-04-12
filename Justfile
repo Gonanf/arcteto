@@ -1,102 +1,78 @@
-# ArcTeto - Custom Arch Linux ISO with Hyprland
-#
-# Available commands:
-#   just build       - Build the ISO only (requires archiso package)
-#   just build-run   - Build and run the ISO
-#   just run         - Run the built ISO in QEMU (requires qemu)
-#   just test        - Run all tests
-#   just clean       - Clean build artifacts
-#   just help        - Show this help
-
-# Default target (show commands)
 default:
     @just --list
 
-# Build the ISO only (without running)
 build:
     #!/usr/bin/env fish
     
     echo "Building ArcTeto ISO (without running)..."
     ./build.fish --no-run
 
-# Build ISO without custom packages
 build-no-custom:
     #!/usr/bin/env fish
     
     echo "Building ArcTeto ISO without custom packages..."
     ./build.fish --no-run --no-custom
 
-# Build and run the ISO
 build-run:
     #!/usr/bin/env fish
     
     echo "Building and running ArcTeto ISO..."
     ./build.fish
 
-# Build custom packages only
 build-custom:
     #!/usr/bin/env fish
     
     echo "Building custom packages only..."
     ./build-custom-packages.fish
 
-# Run the built ISO in QEMU
 run:
     #!/usr/bin/env fish
     
     echo "Starting ArcTeto ISO in QEMU..."
     ./start_emu.fish
 
-# Run test disk (without ISO)
 test-disk:
     #!/usr/bin/env fish
     
     echo "Testing QEMU disk..."
     ./test_disk.fish
 
-# Run all tests
 test:
     #!/usr/bin/env fish
     
     echo "Running ArcTeto test suite..."
     cd tests && fish run_all_tests.fish
 
-# Run simple tests
 test-simple:
     #!/usr/bin/env fish
     
     echo "Running simple tests..."
     cd tests && fish test_simple.fish
 
-# Test syntax
 test-syntax:
     #!/usr/bin/env fish
     
     echo "Testing syntax..."
     cd tests && fish test_fish_functions_syntax.fish
 
-# Test config syntax
 test-config:
     #!/usr/bin/env fish
     
     echo "Testing config syntax..."
     cd tests && fish test_config_syntax.fish
 
-# Test installation scripts
 test-install:
     #!/usr/bin/env fish
     
     echo "Testing installation scripts..."
     cd tests && fish test_installation_script.fish
 
-# Test build dependencies
 test-deps:
     #!/usr/bin/env fish
     
     echo "Testing build dependencies..."
     cd tests && fish test_build_deps.fish
 
-# Clean build artifacts
 clean:
     #!/usr/bin/env fish
     
@@ -115,7 +91,6 @@ clean:
         rm packages.x86_64
     fi
 
-# Sync configurations from user's home to project
 sync-configs:
     #!/usr/bin/env fish
     
@@ -141,7 +116,6 @@ sync-configs:
     
     echo "Configuration sync complete!"
 
-# Show dependency installation instructions
 install-deps:
     #!/usr/bin/env fish
     
@@ -158,6 +132,5 @@ install-deps:
     echo ""
     echo "Note: Adjust package names for your distribution."
 
-# Show help
 help:
     @just --list

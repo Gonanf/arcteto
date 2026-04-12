@@ -1,11 +1,9 @@
 #!/usr/bin/fish
-# Build custom packages and create local repository
 
 set -l failed 0
 
 echo "=== Building custom packages ==="
 
-# Check for required commands
 set -l required_cmds git makepkg repo-add
 set -l missing_cmds
 for cmd in $required_cmds
@@ -21,7 +19,6 @@ if test -n "$missing_cmds"
     exit 0
 end
 
-# Create directories
 mkdir -p airootfs/local/repo
 
 if not test -e /local/repo 
@@ -36,18 +33,15 @@ end
 
 mkdir -p custom-repo/build
 
-# Function to build a package from AUR
 function build_aur_package
     set -l pkg_name $argv[1]
     set -l build_dir custom-repo/build/$pkg_name
     
     echo "Building $pkg_name from AUR..."
     
-    # Clean previous build
     rm -rf $build_dir
     mkdir -p $build_dir
     
-    # Clone from AUR
     echo "  Cloning from AUR..."
     if not git clone https://aur.archlinux.org/$pkg_name.git $build_dir 2>/dev/null
         echo "  Failed to clone $pkg_name from AUR"
@@ -56,18 +50,15 @@ function build_aur_package
     
     cd $build_dir
     
-    # Check for PKGBUILD
     if not test -f PKGBUILD
         echo "  No PKGBUILD found for $pkg_name"
         cd -
         return 1
     end
     
-    # Show package info
     echo "  Package info:"
     makepkg --printsrcinfo | grep -E '^\s*pkgver|^\s*pkgrel|^\s*arch' | sed 's/^/    /'
     
-    # Check for dependencies
     echo "  Checking dependencies..."
     set -l deps (makepkg --printsrcinfo | grep -E '^\s*makedepends|^\s*depends' | sed 's/.*= //' | tr '\n' ' ')
     if test -n "$deps"
@@ -75,7 +66,6 @@ function build_aur_package
         echo "  Please ensure all dependencies are installed before building"
     end
     
-    # Build package
     echo "  Building $pkg_name (this may take a while)..."
     if not makepkg -s --noconfirm
         echo "  Failed to build $pkg_name"
@@ -85,7 +75,6 @@ function build_aur_package
         return 1
     end
     
-    # Move package to repo
     mv *.pkg.tar.zst /local/repo/
 
     cd -
@@ -108,7 +97,6 @@ while read -l line
 end < airootfs/etc/aur_packages.x86_64
 
 
-# Create repository database if we have packages
 set -l pkg_count (ls -1 /local/repo/ 2>/dev/null | wc -l)
 if test $pkg_count -gt 0
     echo ""
@@ -117,10 +105,8 @@ if test $pkg_count -gt 0
     echo "Packages in repository:"
     ls -1 *.pkg.tar.zst | sed 's/^/  /'
     
-    # Create or update repository database
     repo-add custom.db.tar.gz *.pkg.tar.zst 2>/dev/null || true
     
-    # Create symlink for compatibility
     if not test -f custom.db
         ln -sf custom.db.tar.gz custom.db 2>/dev/null || true
     end
@@ -144,7 +130,6 @@ echo "=== Custom packages build completed ==="
 if test $failed -gt 0
     echo "Failed to build $failed package(s)"
     echo "The ISO will be built without custom packages"
-    # Remove any partial packages
     rm -f /local/repo/*.pkg.tar.zst 2>/dev/null || true
     exit 0  # Don't fail the entire build, just continue without custom packages
 else

@@ -18,7 +18,6 @@ while test $arg_idx -le (count $argv)
     set arg_idx (math $arg_idx + 1)
 end
 
-# Build custom packages if not disabled
 if not $no_custom
     echo "=== Building custom packages ==="
     if not ./build-custom-packages.fish
@@ -26,8 +25,7 @@ if not $no_custom
     end
 end
 
-# Copy wallpapers to project ./wallpapers directory
-echo "=== Copying wallpapers to project directory ==="
+echo "=== Copying wallpapers to project directory ===="
 mkdir -p ./wallpapers
 cp -r ~/Imágenes/Wallpapers/* ./wallpapers/ 2>/dev/null
 
@@ -42,7 +40,6 @@ sudo chown $(whoami) -R out
 exit
 "
 
-# Only run emulator if --no-run flag is not set
 if not $no_run
     ./start_emu.fish
 end

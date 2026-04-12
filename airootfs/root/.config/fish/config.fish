@@ -3,7 +3,6 @@ test -e ~/Descargas; or LC_ALL=es_AR.UTF-8 xdg-user-dirs-update --force
 # Set XDG menu prefix for KDE applications
 set -gx XDG_MENU_PREFIX arch-
 
-# Common aliases
 alias ls 'ls --color=auto'
 alias ll 'ls -la'
 alias l 'ls -lah'
