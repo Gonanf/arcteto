@@ -26,6 +26,12 @@ if not $no_custom
     end
 end
 
+# Copy wallpapers to project ./wallpapers directory
+echo "=== Copying wallpapers to project directory ==="
+mkdir -p ./wallpapers
+cp -r ./airootfs/root/Imágenes/Wallpapers/* ./wallpapers/ 2>/dev/null || true
+ls -la ./wallpapers/
+
 rm packages.x86_64
 cp /usr/share/archiso/configs/releng/packages.x86_64 .
 cat ./airootfs/etc/custom_packages.x86_64 >>packages.x86_64

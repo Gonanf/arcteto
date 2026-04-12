@@ -95,6 +95,9 @@ end
 
 # Try to build zen-browser from AUR
 while read -l line
+	if string length $line == 0
+		continue
+	end
 	echo ""
 	echo "--- Building" $line "---"
 	if not build_aur_package $line
