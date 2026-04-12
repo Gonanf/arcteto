@@ -143,6 +143,7 @@ function install_arcteto
     log Instalation "Setting up the keymap"
     echo "
     KEYMAP=$keymap
+    FONT=ter-v16n
     XKBLAYOUT=latam
     XKBMODEL=pc105" | sudo tee /mnt/etc/vconsole.conf
 
@@ -247,8 +248,13 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     sudo cp ./.profile "/mnt/home/$username/.profile"
 
     log Instalation "Owning config files"
-    sudo arch-chroot /mnt chown -R $username:$username /mnt/home/$username/.config
-    sudo arch-chroot /mnt chown -R $username:$username /mnt/home/$username/.profile
+    # Fix home directory permissions
+    sudo arch-chroot /mnt chown $username:users /home/$username
+    sudo arch-chroot /mnt chmod 700 /home/$username
+    # Fix config and profile ownership
+    sudo arch-chroot /mnt chown -R $username:users /home/$username/.config
+    sudo arch-chroot /mnt chown $username:users /home/$username/.profile
+    sudo arch-chroot /mnt chmod -R 755 /home/$username/.config
 
     log Instalation "Setting up pacman"
     # sudo cp /etc/pacman.conf /mnt/etc/
@@ -258,11 +264,38 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     Include = /etc/pacman.d/mirrorlist" | sudo tee -a /mnt/etc/pacman.conf
 
     log Instalation "Enabling snapshots, integrity verification and Out Of Memory protections"
-    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer systemd-oomd systemd-networkd systemd-resolver sshd
+    set services reflector.timer snapper-timeline.timer snapper-cleanup.timer btrfs-scrub@-.timer btrfs-scrub@home.timer btrfs-scrub@var-log.timer btrfs-scrub@\\x2esnapshots.timer systemd-oomd systemd-networkd systemd-resolved sshd
     for service in $services
         sudo systemctl enable "$service" --root=/mnt
     end
     sudo systemctl --user enable xdg-user-dirs --root=/mnt
+
+    log Instalation "Applying system fixes"
+    sudo arch-chroot /mnt /bin/fish -c "
+    # Symlink nerd font config for proper font rendering
+    mkdir -p /etc/fonts/conf.d
+    ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf /etc/fonts/conf.d/10-nerd-font-symbols.conf
+
+    # Fix /boot permissions for random seed security
+    if [ -d /boot ]; then
+        chmod 700 /boot 2>/dev/null || true
+    fi
+
+    # Run kbuildsycoca6 to rebuild application menu database
+    if command -v kbuildsycoca6 &> /dev/null; then
+        XDG_MENU_PREFIX=arch- kbuildsycoca6 || true
+    fi
+
+    # Enable systemd-timesyncd
+    systemctl enable systemd-timesyncd.service
+    "
+
+    log Instalation "Copying wallpapers"
+    if [ -d /root/wallpapers ]; then
+        sudo mkdir -p /mnt/home/$username/wallpapers
+        sudo cp -r /root/wallpapers/* /mnt/home/$username/wallpapers/
+        sudo arch-chroot /mnt chown -R $username:users /home/$username/wallpapers
+    end
 
     log Instalation "Installed correctly"
 end
