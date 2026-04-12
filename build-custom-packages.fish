@@ -23,6 +23,17 @@ end
 
 # Create directories
 mkdir -p airootfs/local/repo
+
+if not test -e /local/repo 
+    	echo "Missing /local/repo"
+	sudo mkdir -p /local/repo
+end
+
+if not test -G /local/repo
+	echo "Local repo is not owned by the user, changing ownership..."
+	sudo chown (whoami) /local/repo
+end
+
 mkdir -p custom-repo/build
 
 # Function to build a package from AUR
@@ -66,7 +77,7 @@ function build_aur_package
     
     # Build package
     echo "  Building $pkg_name (this may take a while)..."
-    if not makepkg -s --noconfirm --needed
+    if not makepkg -s --noconfirm
         echo "  Failed to build $pkg_name"
         echo "  You may need to install missing dependencies:"
         echo "  sudo pacman -Sy --needed base-devel $deps"
@@ -75,35 +86,30 @@ function build_aur_package
     end
     
     # Move package to repo
-    mv *.pkg.tar.zst ./airootfs/local/repo/
-    
+    mv *.pkg.tar.zst /local/repo/
+
     cd -
     echo "  Successfully built $pkg_name"
     return 0
 end
 
 # Try to build zen-browser from AUR
-echo ""
-echo "--- Building zen-browser ---"
-if not build_aur_package zen-browser
-    echo "Failed to build zen-browser"
-    set failed (math $failed + 1)
-end
+while read -l line
+	echo ""
+	echo "--- Building" $line "---"
+	if not build_aur_package $line
+    		echo "Failed to build" $line
+    		set failed (math $failed + 1)
+	end
+end < airootfs/etc/aur_packages.x86_64
 
-# Try to build noctalia-shell from AUR
-echo ""
-echo "--- Building noctalia-shell ---"
-if not build_aur_package noctalia-shell
-    echo "Failed to build noctalia-shell"
-    set failed (math $failed + 1)
-end
 
 # Create repository database if we have packages
-set -l pkg_count (ls -1 airootfs/local/repo/*.pkg.tar.zst 2>/dev/null | wc -l)
+set -l pkg_count (ls -1 /local/repo/*.pkg.tar.zst 2>/dev/null | wc -l)
 if test $pkg_count -gt 0
     echo ""
     echo "=== Creating custom repository ==="
-    cd airootfs/local/repo
+    cd /local/repo
     echo "Packages in repository:"
     ls -1 *.pkg.tar.zst | sed 's/^/  /'
     
@@ -119,6 +125,8 @@ if test $pkg_count -gt 0
     end
     
     cd -
+    rm -r ./airootfs/local/repo/*
+	cp /local/repo/*  ./airootfs/local/repo/
     echo "Custom repository created with $pkg_count packages"
 else
     echo ""
@@ -133,7 +141,7 @@ if test $failed -gt 0
     echo "Failed to build $failed package(s)"
     echo "The ISO will be built without custom packages"
     # Remove any partial packages
-    rm -f airootfs/local/repo/*.pkg.tar.zst 2>/dev/null || true
+    rm -f /local/repo/*.pkg.tar.zst 2>/dev/null || true
     exit 0  # Don't fail the entire build, just continue without custom packages
 else
     echo "All packages built successfully"

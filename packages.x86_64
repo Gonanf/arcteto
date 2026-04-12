@@ -213,6 +213,7 @@ kubectl
 hyprland
 quickshell
 noctalia-shell
+noctalia-qs
 rocm-smi
 vulkan-radeon
 vulkan-intel
@@ -288,5 +289,5 @@ wasi-libc++
 wasi-libc++abi
 xorg-server-xvfb
 yasm
-zen-browser
+zen-browser-bin
 

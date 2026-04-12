@@ -14,92 +14,92 @@ default:
 
 # Build the ISO only (without running)
 build:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Building ArcTeto ISO (without running)..."
     ./build.fish --no-run
 
 # Build ISO without custom packages
 build-no-custom:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Building ArcTeto ISO without custom packages..."
     ./build.fish --no-run --no-custom
 
 # Build and run the ISO
 build-run:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Building and running ArcTeto ISO..."
     ./build.fish
 
 # Build custom packages only
 build-custom:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Building custom packages only..."
     ./build-custom-packages.fish
 
 # Run the built ISO in QEMU
 run:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Starting ArcTeto ISO in QEMU..."
     ./start_emu.fish
 
 # Run test disk (without ISO)
 test-disk:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Testing QEMU disk..."
     ./test_disk.fish
 
 # Run all tests
 test:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Running ArcTeto test suite..."
     cd tests && fish run_all_tests.fish
 
 # Run simple tests
 test-simple:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Running simple tests..."
     cd tests && fish test_simple.fish
 
 # Test syntax
 test-syntax:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Testing syntax..."
     cd tests && fish test_fish_functions_syntax.fish
 
 # Test config syntax
 test-config:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Testing config syntax..."
     cd tests && fish test_config_syntax.fish
 
 # Test installation scripts
 test-install:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Testing installation scripts..."
     cd tests && fish test_installation_script.fish
 
 # Test build dependencies
 test-deps:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Testing build dependencies..."
     cd tests && fish test_build_deps.fish
 
 # Clean build artifacts
 clean:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Cleaning build artifacts..."
     rm -rf out archiso-tmp .temp.raw custom-repo
     
@@ -117,8 +117,8 @@ clean:
 
 # Sync configurations from user's home to project
 sync-configs:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Syncing configurations from user home to project..."
     
     # Hyprland config
@@ -143,8 +143,8 @@ sync-configs:
 
 # Show dependency installation instructions
 install-deps:
-    #!/usr/bin/env bash
-    set -e
+    #!/usr/bin/env fish
+    
     echo "Dependency installation instructions for Arch Linux:"
     echo ""
     echo "1. Required for building ISO:"

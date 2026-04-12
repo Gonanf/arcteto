@@ -23,7 +23,6 @@ uwsm
 # CLI Utils
 git
 github-cli
-paru
 nvim
 yt-dlp
 libnewt
@@ -83,9 +82,6 @@ kubectl
 
 # Graphics
 hyprland
-quickshell
-noctalia-shell
-rocm-smi
 vulkan-radeon
 vulkan-intel
 intel-gpu-tools
@@ -160,5 +156,4 @@ wasi-libc++
 wasi-libc++abi
 xorg-server-xvfb
 yasm
-zen-browser
 

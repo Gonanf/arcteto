@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" width="400" height="150">
+  <defs>
+    <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9333EA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DB2777;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#DB2777;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Crescent moon -->
+  <path d="M 70 60 Q 90 30 120 45 Q 115 25 100 20 Q 75 15 60 40 Q 55 55 70 60 Z" 
+        fill="url(#purpleGradient)" 
+        filter="url(#glow)"
+        transform="rotate(-15 90 50)"/>
+  
+  <!-- Small star -->
+  <polygon points="140,35 143,43 152,43 145,49 147,57 140,52 133,57 135,49 128,43 137,43" 
+           fill="#F59E0B" 
+           filter="url(#glow)"/>
+  
+  <!-- Another small star -->
+  <polygon points="55,75 57,79 61,79 58,81 59,85 55,82 51,85 52,81 48,79 52,79" 
+           fill="#DB2777" 
+           opacity="0.8"/>
+  
+  <!-- Text -->
+  <text x="180" y="95" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="52" 
+        font-weight="bold"
+        fill="url(#pinkGradient)" 
+        filter="url(#glow)">arcteto</text>
+  
+  <!-- Subtle accent line -->
+  <line x1="180" y1="105" x2="350" y2="105" 
+        stroke="url(#purpleGradient)" 
+        stroke-width="2" 
+        opacity="0.6"/>
+</svg>
