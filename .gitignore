@@ -3,5 +3,7 @@ work
 out
 .temp.raw
 .archiso-tmp
+.sishypus
 custom-repo
 airootfs/local/repo
+wallpapers

@@ -29,8 +29,7 @@ end
 # Copy wallpapers to project ./wallpapers directory
 echo "=== Copying wallpapers to project directory ==="
 mkdir -p ./wallpapers
-cp -r ./airootfs/root/Imágenes/Wallpapers/* ./wallpapers/ 2>/dev/null || true
-ls -la ./wallpapers/
+cp -r ~/Imágenes/Wallpapers/* ./wallpapers/ 2>/dev/null
 
 rm packages.x86_64
 cp /usr/share/archiso/configs/releng/packages.x86_64 .

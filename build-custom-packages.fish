@@ -31,7 +31,7 @@ end
 
 if not test -G /local/repo
 	echo "Local repo is not owned by the user, changing ownership..."
-	sudo chown (whoami) /local/repo
+	sudo chown (whoami):(whoami) /local/repo
 end
 
 mkdir -p custom-repo/build
@@ -95,9 +95,10 @@ end
 
 # Try to build zen-browser from AUR
 while read -l line
-	if string length $line == 0
+	if not string length $line -q
 		continue
 	end
+
 	echo ""
 	echo "--- Building" $line "---"
 	if not build_aur_package $line
@@ -108,7 +109,7 @@ end < airootfs/etc/aur_packages.x86_64
 
 
 # Create repository database if we have packages
-set -l pkg_count (ls -1 /local/repo/*.pkg.tar.zst 2>/dev/null | wc -l)
+set -l pkg_count (ls -1 /local/repo/ 2>/dev/null | wc -l)
 if test $pkg_count -gt 0
     echo ""
     echo "=== Creating custom repository ==="

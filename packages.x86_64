@@ -151,7 +151,6 @@ uwsm
 # CLI Utils
 git
 github-cli
-paru
 nvim
 yt-dlp
 libnewt
@@ -211,10 +210,6 @@ kubectl
 
 # Graphics
 hyprland
-quickshell
-noctalia-shell
-noctalia-qs
-rocm-smi
 vulkan-radeon
 vulkan-intel
 intel-gpu-tools
@@ -261,6 +256,9 @@ resvg
 taglib
 filelight
 qt5ct
+kservice
+kbuildsycoca6
+archlinux-xdg-menu
 
 # Gaming
 steam
@@ -289,5 +287,4 @@ wasi-libc++
 wasi-libc++abi
 xorg-server-xvfb
 yasm
-zen-browser-bin
 
