@@ -1,0 +1,13 @@
+[KDE]
+ShowDeleteCommand=false
+
+[General]
+TerminalApplication=ghostty
+
+[Locale]
+Country=ar
+Language=es
+
+[PreviewSettings]
+EnableRemoteFolderThumbnail=true
+MaximumRemoteSize=157286400

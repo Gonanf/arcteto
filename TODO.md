@@ -13,6 +13,7 @@
 [x] Separar custom_packages entre los de repositorios y los de AUR
 [x] Modificar build-custom-packages para utilizar el listado de packetes AUR e instalarlos
 [x] Copiar custom_db en airootfs/local/repo
+#Why do i sometimes talk in english? Because docs.
 [x] Error pacstrap: file not found /etc/vconsole.conf
 [x] Symlink /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf to /etc/fonts/conf.d/
 [x] Error: Mount point /boot which backs the random seed file is world accesible, which is a security hole
@@ -27,5 +28,7 @@
 [x] Create aliases for common commands
 [x] Add qt6-websockets (AAUR)
 [x] Add kbuildsycoca6
-[ ] Set the configs to the correct user (Hyprland and noctalia configs)
+[x] Set the configs to the correct user (Hyprland and noctalia configs)
 [ ] Make bindings for tooling (OCR, Palette scanner, etc. from the noctalia plugin screen toolkit)
+[ ] Add cache for AUR and pacstrap
+[ ] Add automated tests in QEMU

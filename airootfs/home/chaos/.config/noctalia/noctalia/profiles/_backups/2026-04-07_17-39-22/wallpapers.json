@@ -1,0 +1,14 @@
+{
+  "screens": [
+    {
+      "name": "",
+      "light": "/home/chaos/Imágenes/Wallpapers/kasane_teto21.jpg",
+      "dark": "/home/chaos/Imágenes/Wallpapers/kasane_teto21.jpg"
+    },
+    {
+      "name": "HDMI-A-4",
+      "light": "/home/chaos/Imágenes/Wallpapers/kasane_teto21.jpg",
+      "dark": "/home/chaos/Imágenes/Wallpapers/kasane_teto21.jpg"
+    }
+  ]
+}

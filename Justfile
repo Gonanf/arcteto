@@ -92,29 +92,33 @@ clean:
     fi
 
 sync-configs:
-    #!/usr/bin/env fish
+	#!/usr/bin/env fish
     
-    echo "Syncing configurations from user home to project..."
-    
-    # Hyprland config
-    if [[ -d "$HOME/.config/hypr" ]]; then
-        echo "Copying Hyprland configuration..."
-        rm -rf airootfs/root/.config/hypr
-        cp -r "$HOME/.config/hypr" airootfs/root/.config/
-    else
-        echo "Warning: $HOME/.config/hypr not found"
-    fi
-    
-    # Noctalia config
-    if [[ -d "$HOME/.config/noctalia" ]]; then
-        echo "Copying Noctalia configuration..."
-        rm -rf airootfs/root/.config/noctalia
-        cp -r "$HOME/.config/noctalia" airootfs/root/.config/
-    else
-        echo "Warning: $HOME/.config/noctalia not found"
-    fi
-    
-    echo "Configuration sync complete!"
+	echo "Syncing configurations from user home to project..."
+	set failed 0
+
+	while read -l line
+		set line (string replace -r '^~' $HOME -- $line)
+		if not string length $line -q
+			continue
+		end
+
+		echo ""
+		echo "--- Copying" $line "---"
+		set target airootfs/(string replace -r "^~/" "" -- $line)
+		rm -rf $target
+		mkdir -p $target
+		if not cp -r (realpath $line) $target
+			echo "Failed to copy" $line "into" $target
+			set failed (math $failed + 1)
+		end
+	end < configs.d
+       
+	if test $failed -gt 0
+		echo "Configuration sync completed with errors (" $failed ")" 
+	else 
+		echo "Configuration sync complete!" 
+	end
 
 install-deps:
     #!/usr/bin/env fish

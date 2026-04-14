@@ -278,10 +278,10 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     "
 
     log Instalation "Copying wallpapers"
-    if [ -d /root/wallpapers ]; then
-        sudo mkdir -p /mnt/home/$username/wallpapers
-        sudo cp -r /root/wallpapers/* /mnt/home/$username/wallpapers/
-        sudo arch-chroot /mnt chown -R $username:users /home/$username/wallpapers
+    if test -e /root/Imágenes/Wallpapers
+        sudo mkdir -p /mnt/home/$username/Imágenes/Wallpapers
+        sudo cp -r /root/wallpapers/* /mnt/home/$username/Imágenes/Wallpapers
+        sudo arch-chroot /mnt chown -R $username:$username /home/$username/Imágenes/Wallpapers
     end
 
     log Instalation "Installed correctly"

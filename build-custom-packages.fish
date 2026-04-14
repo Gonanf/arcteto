@@ -82,7 +82,7 @@ function build_aur_package
     return 0
 end
 
-# Try to build zen-browser from AUR
+# Try to build from AUR
 while read -l line
 	if not string length $line -q
 		continue
