@@ -27,3 +27,5 @@
 [x] Create aliases for common commands
 [x] Add qt6-websockets (AAUR)
 [x] Add kbuildsycoca6
+[ ] Set the configs to the correct user (Hyprland and noctalia configs)
+[ ] Make bindings for tooling (OCR, Palette scanner, etc. from the noctalia plugin screen toolkit)
