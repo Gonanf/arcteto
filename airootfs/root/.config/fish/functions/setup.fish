@@ -242,10 +242,10 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     sudo cp ./.profile "/mnt/home/$username/.profile"
 
     log Instalation "Owning config files"
-    sudo arch-chroot /mnt chown $username:users /home/$username
+    sudo arch-chroot /mnt chown $username:$username /home/$username
     sudo arch-chroot /mnt chmod 700 /home/$username
-    sudo arch-chroot /mnt chown -R $username:users /home/$username/.config
-    sudo arch-chroot /mnt chown $username:users /home/$username/.profile
+    sudo arch-chroot /mnt chown -R $username:$username /home/$username/.config
+    sudo arch-chroot /mnt chown $username:$username /home/$username/.profile
     sudo arch-chroot /mnt chmod -R 755 /home/$username/.config
 
     log Instalation "Setting up pacman"
@@ -262,7 +262,7 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     sudo systemctl --user enable xdg-user-dirs --root=/mnt
 
     log Instalation "Applying system fixes"
-    sudo arch-chroot /mnt /bin/fish -c "
+    sudo arch-chroot /mnt /bin/bash-c "
     mkdir -p /etc/fonts/conf.d
     ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf /etc/fonts/conf.d/10-nerd-font-symbols.conf
 

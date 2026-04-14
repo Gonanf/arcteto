@@ -6,12 +6,12 @@ set -q ARCTETO_SIZE; or set ARCTETO_SIZE 50G
 
 if not test -G $ARCTETO_ISO_PATH
 	echo "You do not have access to the ISO path, changing ownership..."
-	sudo chown (whoami) $ARCTETO_ISO_PATH
+	sudo chown (whoami):(whoami) $ARCTETO_ISO_PATH
 end
 
 if not test -G /usr/share/OVMF/x64/OVMF_VARS.4m.fd
 	echo "You do not have access to the UEFI vars, changing ownership..."
-	sudo chown (whoami) /usr/share/OVMF/x64/OVMF_VARS.4m.fd
+	sudo chown (whoami):(whoami) /usr/share/OVMF/x64/OVMF_VARS.4m.fd
 end
 
 test -e $ARCTETO_ISO_PATH; or qemu-img create -f raw $ARCTETO_ISO_PATH $ARCTETO_SIZE
