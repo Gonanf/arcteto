@@ -6,5 +6,5 @@ out
 .sishypus
 custom-repo
 airootfs/local/repo
-wallpapers
-airootfs/root/wallpapers
+**/wallpapers
+airootfs/root/Imágenes

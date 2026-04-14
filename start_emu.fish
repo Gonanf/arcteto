@@ -4,6 +4,7 @@ set -q ARCTETO_EXTRA_PARAMS; or set ARCTETO_EXTRA_PARAMS -accel kvm
 set -q ARCTETO_MEMORY; or set ARCTETO_MEMORY 16G
 set -q ARCTETO_SIZE; or set ARCTETO_SIZE 50G
 
+touch $ARCTETO_ISO_PATH
 if not test -G $ARCTETO_ISO_PATH
 	echo "You do not have access to the ISO path, changing ownership..."
 	sudo chown (whoami):(whoami) $ARCTETO_ISO_PATH
