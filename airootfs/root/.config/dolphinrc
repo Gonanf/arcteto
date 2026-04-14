@@ -3,9 +3,15 @@ MenuBar=Disabled
 [ContextMenu]
 ShowOpenTerminal=false
 
+[ExtractDialog]
+1920x1080 screen: Window-Maximized=true
+
 [General]
 Version=202
 ViewPropsTimestamp=2026,1,22,17,31,22.885
+
+[IconsMode]
+PreviewSize=176
 
 [InformationPanel]
 previewsAutoPlay=true

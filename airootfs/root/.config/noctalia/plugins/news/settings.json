@@ -1,0 +1,10 @@
+{
+  "apiKey": "YOUR_API_KEY_HERE",
+  "country": "us",
+  "language": "en",
+  "category": "general",
+  "refreshInterval": 30,
+  "maxHeadlines": 10,
+  "rollingSpeed": 50,
+  "widgetWidth": 300
+}

@@ -262,7 +262,7 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
     sudo systemctl --user enable xdg-user-dirs --root=/mnt
 
     log Instalation "Applying system fixes"
-    sudo arch-chroot /mnt /bin/bash-c "
+    sudo arch-chroot /mnt /bin/bash -c "
     mkdir -p /etc/fonts/conf.d
     ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf /etc/fonts/conf.d/10-nerd-font-symbols.conf
 

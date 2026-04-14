@@ -4,3 +4,4 @@
 ~/.config/ghostty
 ~/.config/kdeglobals
 ~/.config/user-dirs.dirs
+~/.cache/noctalia

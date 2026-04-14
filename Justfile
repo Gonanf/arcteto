@@ -98,16 +98,16 @@ sync-configs:
 	set failed 0
 
 	while read -l line
+		set target airootfs/root/(string replace -r "^~/" "" -- $line)
 		set line (string replace -r '^~' $HOME -- $line)
 		if not string length $line -q
 			continue
 		end
 
 		echo ""
-		echo "--- Copying" $line "---"
-		set target airootfs/(string replace -r "^~/" "" -- $line)
+		echo "--- Copying" $line "into" $target "---"
+
 		rm -rf $target
-		mkdir -p $target
 		if not cp -r (realpath $line) $target
 			echo "Failed to copy" $line "into" $target
 			set failed (math $failed + 1)

@@ -1,6 +1,13 @@
 {
-  "thumbCacheReady": true,
+  "activeBackend": "qt6-multimedia",
+  "automationMode": "random",
+  "automationTime": 300,
+  "fillMode": "fit",
+  "mpvSocket": "/tmp/mpv-socket",
+  "profile": "default",
+  "volume": 1,
   "wallpapersFolder": "/home/chaos/Vídeos/Memes",
+  "thumbCacheReady": true,
   "enabled": false,
   "HDMI-A-4": {
     "currentWallpaper": "",

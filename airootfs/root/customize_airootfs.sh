@@ -3,13 +3,13 @@ groupadd docker
 systemctl --user enable --now pipewire.service pipewire-pulse.service wireplumber.service
 
 mkdir -p /home/teto
-chown teto:users /home/teto
+chown -R teto:users /home/teto
 
 cp -r /root/.config /home/teto/.config
-cp -r /root/Imágenes /home/teto/Imágenes
+cp -r /root/Pictures /home/teto/Pictures
 
 # Ensure user owns all config files (including parent directories)
-chown -R teto:teto /home/teto
+chown -R teto:users /home/teto
 chmod 700 /home/teto
 chmod -R 755 /home/teto/.config
 

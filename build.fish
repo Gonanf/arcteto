@@ -27,11 +27,12 @@ end
 
 echo "=== Copying wallpapers to project directory ===="
 mkdir -p ./wallpapers
-cp -r ~/Imágenes/Wallpapers/* ./airootfs/root/Imágenes/Wallpapers 2>/dev/null
+cp -r ~/Imágenes/Wallpapers/* ./airootfs/root/Pictures/Wallpapers 2>/dev/null
 
 rm packages.x86_64
 cp /usr/share/archiso/configs/releng/packages.x86_64 .
 cat ./airootfs/etc/custom_packages.x86_64 >>packages.x86_64
+cat ./airootfs/etc/aur_packages.x86_64 >>packages.x86_64
 su -c "
 rm -rf out
 mkarchiso -w ./archiso-tmp -r -v .

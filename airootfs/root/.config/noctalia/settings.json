@@ -8,7 +8,9 @@
         "customLaunchPrefixEnabled": false,
         "density": "default",
         "enableClipPreview": true,
+        "enableClipboardChips": true,
         "enableClipboardHistory": true,
+        "enableClipboardSmartIcons": true,
         "enableSessionSearch": true,
         "enableSettingsSearch": true,
         "enableWindowsSearch": true,
@@ -23,7 +25,6 @@
         "showIconBackground": false,
         "sortByMostUsed": true,
         "terminalCommand": "ghostty -e",
-        "useApp2Unit": false,
         "viewMode": "list"
     },
     "audio": {
@@ -31,6 +32,7 @@
         ],
         "preferredPlayer": "",
         "spectrumFrameRate": 30,
+        "spectrumMirrored": true,
         "visualizerType": "mirrored",
         "volumeFeedback": false,
         "volumeFeedbackSoundFile": "",
@@ -48,7 +50,6 @@
         "density": "default",
         "displayMode": "always_visible",
         "enableExclusionZoneInset": true,
-        "floating": false,
         "fontScale": 1,
         "frameRadius": 12,
         "frameThickness": 8,
@@ -103,21 +104,31 @@
                     "id": "WallpaperSelector"
                 },
                 {
-                    "defaultSettings": {
-                        "activeBackend": "qt6-multimedia",
-                        "automationMode": "random",
-                        "automationTime": 300,
-                        "fillMode": "fit",
-                        "mpvSocket": "/tmp/mpv-socket",
-                        "profile": "default",
-                        "volume": 1,
-                        "wallpapersFolder": "~/Pictures/Wallpapers"
-                    },
-                    "id": "plugin:video-wallpaper"
-                },
-                {
                     "iconColor": "none",
                     "id": "NoctaliaPerformance"
+                },
+                {
+                    "displayMode": "onhover",
+                    "iconColor": "none",
+                    "id": "VPN",
+                    "textColor": "none"
+                },
+                {
+                    "defaultSettings": {
+                        "hideSystemPorts": false,
+                        "hideWhenEmpty": false,
+                        "refreshInterval": 5
+                    },
+                    "id": "plugin:port-monitor"
+                },
+                {
+                    "commandPrefix": "ssh",
+                    "defaultSettings": {
+                        "pollInterval": 10,
+                        "showInactiveHosts": true,
+                        "terminalCommand": ""
+                    },
+                    "id": "plugin:ssh-sessions"
                 }
             ],
             "left": [
@@ -168,6 +179,7 @@
                     "maxWidth": 145,
                     "scrollingMode": "hover",
                     "showIcon": true,
+                    "showText": true,
                     "textColor": "none",
                     "useFixedWidth": false
                 },
@@ -265,17 +277,82 @@
                     "id": "plugin:catwalk"
                 },
                 {
-                    "displayMode": "onhover",
-                    "iconColor": "none",
-                    "id": "VPN",
-                    "textColor": "none"
+                    "defaultSettings": {
+                        "assetsDir": "",
+                        "autoApplyOnStartup": true,
+                        "defaultAudioReactiveEffects": true,
+                        "defaultDisableMouse": false,
+                        "defaultDisableParallax": false,
+                        "defaultFps": 30,
+                        "defaultFullscreenPauseOnlyActive": false,
+                        "defaultMuted": true,
+                        "defaultNoFullscreenPause": false,
+                        "defaultScaling": "fill",
+                        "defaultVolume": 100,
+                        "lastKnownGoodScreens": {
+                        },
+                        "panelLastSelectedPath": "",
+                        "runtimeRecoveryPending": false,
+                        "screens": {
+                        },
+                        "wallpapersFolder": "~/.local/share/Steam/steamapps/workshop/content/431960"
+                    },
+                    "id": "plugin:linux-wallpaperengine-controller"
                 },
                 {
-                    "applyToAllMonitors": false,
-                    "displayMode": "onhover",
-                    "iconColor": "none",
-                    "id": "Brightness",
-                    "textColor": "none"
+                    "defaultSettings": {
+                        "backupCount": 5,
+                        "backupEnabled": true,
+                        "icon": "wand",
+                        "iconColor": "primary",
+                        "includeWallpapers": true,
+                        "lastAppliedProfile": "",
+                        "profilesDir": ""
+                    },
+                    "id": "plugin:shell-profiles"
+                },
+                {
+                    "defaultSettings": {
+                        "colorHistory": [
+                        ],
+                        "detectedRecorder": "",
+                        "installedLangs": [
+                            "eng"
+                        ],
+                        "paletteColors": [
+                        ],
+                        "selectedOcrLang": "eng",
+                        "transAvailable": false
+                    },
+                    "id": "plugin:screen-toolkit"
+                },
+                {
+                    "defaultSettings": {
+                        "mainDeviceId": ""
+                    },
+                    "id": "plugin:valent-connect"
+                },
+                {
+                    "defaultSettings": {
+                        "autoCloseManagedObs": true,
+                        "barLabelMode": "short-label",
+                        "launchBehavior": "minimized-to-tray",
+                        "leftClickAction": "panel",
+                        "openVideosAfterStop": true,
+                        "pollIntervalMs": 2500,
+                        "showBarWhenReady": true,
+                        "showBarWhenRecording": true,
+                        "showBarWhenReplay": false,
+                        "showBarWhenStreaming": true,
+                        "showControlCenterWhenReady": false,
+                        "showControlCenterWhenRecording": true,
+                        "showControlCenterWhenReplay": true,
+                        "showControlCenterWhenStreaming": true,
+                        "showElapsedInBar": false,
+                        "videosOpener": "xdg-open",
+                        "videosPath": ""
+                    },
+                    "id": "plugin:obs-control"
                 }
             ]
         }
@@ -311,6 +388,7 @@
         "monitorForColors": "",
         "predefinedScheme": "Noctalia (default)",
         "schedulingMode": "off",
+        "syncGsettings": true,
         "useWallpaperColors": true
     },
     "controlCenter": {
@@ -461,8 +539,10 @@
         "indicatorColor": "primary",
         "indicatorOpacity": 0.6,
         "indicatorThickness": 3,
+        "launcherIcon": "",
         "launcherIconColor": "none",
         "launcherPosition": "end",
+        "launcherUseDistroLogo": false,
         "monitors": [
         ],
         "onlySameOutput": true,
@@ -481,7 +561,7 @@
         "animationDisabled": false,
         "animationSpeed": 1,
         "autoStartAuth": false,
-        "avatarImage": "/home/chaos/.face",
+        "avatarImage": "~/.face",
         "boxRadiusRatio": 1,
         "clockFormat": "hh\\nmm",
         "clockStyle": "custom",
@@ -537,9 +617,11 @@
         "showHibernateOnLockScreen": false,
         "showScreenCorners": false,
         "showSessionButtonsOnLockScreen": true,
+        "smoothScrollEnabled": true,
         "telemetryEnabled": false
     },
     "hooks": {
+        "colorGeneration": "",
         "darkModeChange": "",
         "enabled": false,
         "performanceModeDisabled": "",
@@ -566,6 +648,7 @@
     },
     "location": {
         "analogClockInCalendar": false,
+        "autoLocate": false,
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
@@ -576,24 +659,23 @@
         "use12hourFormat": true,
         "useFahrenheit": false,
         "weatherEnabled": true,
-        "weatherShowEffects": true
+        "weatherShowEffects": true,
+        "weatherTaliaMascotAlways": false
     },
     "network": {
-        "airplaneModeEnabled": false,
         "bluetoothAutoConnect": true,
         "bluetoothDetailsViewMode": "grid",
         "bluetoothHideUnnamedDevices": false,
         "bluetoothRssiPollIntervalMs": 10000,
         "bluetoothRssiPollingEnabled": false,
         "disableDiscoverability": false,
-        "networkPanelView": "wifi",
-        "wifiDetailsViewMode": "grid",
-        "wifiEnabled": true
+        "networkPanelView": "ethernet",
+        "wifiDetailsViewMode": "grid"
     },
     "nightLight": {
         "autoSchedule": true,
         "dayTemp": "6500",
-        "enabled": false,
+        "enabled": true,
         "forced": false,
         "manualSunrise": "06:30",
         "manualSunset": "18:30",
@@ -650,7 +732,8 @@
         "overlayLayer": true
     },
     "plugins": {
-        "autoUpdate": true
+        "autoUpdate": true,
+        "notifyUpdates": true
     },
     "sessionMenu": {
         "countdownDuration": 10000,
@@ -719,7 +802,7 @@
         "showHeader": true,
         "showKeybinds": true
     },
-    "settingsVersion": 57,
+    "settingsVersion": 59,
     "systemMonitor": {
         "batteryCriticalThreshold": 5,
         "batteryWarningThreshold": 20,
@@ -808,7 +891,7 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/chaos/Imágenes/Wallpapers",
+        "directory": "~/Imágenes/Wallpapers",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [
@@ -816,7 +899,13 @@
         "fillColor": "#000000",
         "fillMode": "crop",
         "hideWallpaperFilenames": false,
+        "linkLightAndDarkWallpapers": true,
         "monitorDirectories": [
+            {
+                "directory": "~/Imágenes/Wallpapers",
+                "name": "HDMI-A-4",
+                "wallpaper": ""
+            }
         ],
         "overviewBlur": 0.4,
         "overviewEnabled": false,
@@ -830,9 +919,17 @@
         "sortOrder": "name",
         "transitionDuration": 1500,
         "transitionEdgeSmoothness": 0.05,
-        "transitionType": "random",
+        "transitionType": [
+            "fade",
+            "disc",
+            "stripes",
+            "wipe",
+            "pixelate",
+            "honeycomb"
+        ],
+        "useOriginalImages": false,
         "useSolidColor": false,
-        "useWallhaven": true,
+        "useWallhaven": false,
         "viewMode": "single",
         "wallhavenApiKey": "",
         "wallhavenCategories": "111",

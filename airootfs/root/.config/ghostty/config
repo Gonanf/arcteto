@@ -1,5 +1,5 @@
 # This is the configuration file for Ghostty.
-theme = Monokai Remastered
+theme = noctalia
 shell-integration = fish
 background-opacity = 0.9
 background-blur = 15
