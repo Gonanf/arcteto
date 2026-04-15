@@ -6,6 +6,7 @@ mkdir -p /home/teto
 chown -R teto:users /home/teto
 
 cp -r /root/.config /home/teto/.config
+cp -r /root/.cache /home/teto/.cache
 cp -r /root/Pictures /home/teto/Pictures
 
 # Ensure user owns all config files (including parent directories)

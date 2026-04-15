@@ -1,6 +1,22 @@
 #!/usr/bin/fish
 
 set -l failed 0
+set upgrade false
+set -l arg_idx 1
+
+while test $arg_idx -le (count $argv)
+    switch $argv[$arg_idx]
+        case --upgrade
+	    echo "Upgrading..."
+            set upgrade true
+        case '*'
+            echo "Unknown option: $argv[$arg_idx]"
+            echo "Usage: $argv[0] [--upgrade]"
+            exit 1
+    end
+    set arg_idx (math $arg_idx + 1)
+end
+
 
 echo "=== Building custom packages ==="
 
@@ -36,7 +52,7 @@ mkdir -p custom-repo/build
 function build_aur_package
     set -l pkg_name $argv[1]
     set -l build_dir custom-repo/build/$pkg_name
-    
+   
     echo "Building $pkg_name from AUR..."
     
     rm -rf $build_dir
@@ -58,6 +74,24 @@ function build_aur_package
     
     echo "  Package info:"
     makepkg --printsrcinfo | grep -E '^\s*pkgver|^\s*pkgrel|^\s*arch' | sed 's/^/    /'
+
+    #Checking only if package exists in the repo
+    echo "Checking if package" $pkg_name "already exists..."
+    set -l package (tar -tf /local/repo/custom.db  | awk -F'/' '{print $1}' | grep -E -m 1 "$pkg_name-[0-9]*.*")
+    if test $package
+	    echo "Package" $pkg_name "already built"
+	    set -l local_version (echo $package | sed -nE "s/.*$pkg_name-([0-9][0-9A-Za-z\.\-_]*).*/\1/ip")
+	    set -l remote_version (makepkg --printsrcinfo | grep -E '^\s*pkgver' | sed -nE "s/.*pkgver = ([0-9][0-9A-Za-z\.\-_]*).*/\1/ip")
+	    #Testing if it is a greater version
+	    if not string match $local_version $remote_version
+		echo "Warning! Version mistmatch, the local built versions are probably outdated (AUR:"$remote_version"!="$local_version")"
+	    end
+	    if not $upgrade
+		    echo "Overriding disabled, leaving as is..."
+		    return 0
+	    end
+    end
+
     
     echo "  Checking dependencies..."
     set -l deps (makepkg --printsrcinfo | grep -E '^\s*makedepends|^\s*depends' | sed 's/.*= //' | tr '\n' ' ')
@@ -75,7 +109,7 @@ function build_aur_package
         return 1
     end
     
-    mv *.pkg.tar.zst /local/repo/
+    cp *.pkg.tar.zst /local/repo/
 
     cd -
     echo "  Successfully built $pkg_name"
@@ -130,7 +164,7 @@ echo "=== Custom packages build completed ==="
 if test $failed -gt 0
     echo "Failed to build $failed package(s)"
     echo "The ISO will be built without custom packages"
-    rm -f /local/repo/*.pkg.tar.zst 2>/dev/null || true
+    #rm -f /local/repo/*.pkg.tar.zst 2>/dev/null || true
     exit 0  # Don't fail the entire build, just continue without custom packages
 else
     echo "All packages built successfully"

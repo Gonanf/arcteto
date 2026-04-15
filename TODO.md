@@ -30,7 +30,7 @@
 [x] Add kbuildsycoca6
 [x] Set the configs to the correct user (Hyprland and noctalia configs)
 [ ] Make bindings for tooling (OCR, Palette scanner, etc. from the noctalia plugin screen toolkit)
-[ ] Add cache for AUR and pacstrap
+[x] Add cache for AUR and pacstrap
 [ ] Add automated tests in QEMU
 [ ] Put the scripts and configs in subfolders to make it cleaner
 [ ] Add docs

@@ -26,7 +26,7 @@ if not $no_custom
 end
 
 echo "=== Copying wallpapers to project directory ===="
-mkdir -p ./wallpapers
+mkdir -p ./airootfs/root/Pictures/Wallpapers
 cp -r ~/Imágenes/Wallpapers/* ./airootfs/root/Pictures/Wallpapers 2>/dev/null
 
 rm packages.x86_64

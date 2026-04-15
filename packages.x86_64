@@ -252,6 +252,7 @@ kdesdk-thumbnailers
 kimageformats
 libappimage
 qt6-imageformats
+qt6-websockets
 resvg
 taglib
 filelight
@@ -292,5 +293,3 @@ zen-browser-bin
 noctalia-qs
 paru
 noctalia-shell
-qt6-websockets
-

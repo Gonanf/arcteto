@@ -124,6 +124,7 @@ kdesdk-thumbnailers
 kimageformats
 libappimage
 qt6-imageformats
+qt6-websockets
 resvg
 taglib
 filelight

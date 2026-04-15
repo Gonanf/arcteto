@@ -239,14 +239,17 @@ console-mode max" | sudo tee /mnt/boot/loader/loader.conf
 
     log Instalation "Copying the config"
     sudo cp -r ./.config "/mnt/home/$username/"
+    sudo cp -r ./.cache "/mnt/home/$username/"
     sudo cp ./.profile "/mnt/home/$username/.profile"
 
     log Instalation "Owning config files"
     sudo arch-chroot /mnt chown $username:$username /home/$username
     sudo arch-chroot /mnt chmod 700 /home/$username
     sudo arch-chroot /mnt chown -R $username:$username /home/$username/.config
+    sudo arch-chroot /mnt chown -R $username:$username /home/$username/.cache
     sudo arch-chroot /mnt chown $username:$username /home/$username/.profile
     sudo arch-chroot /mnt chmod -R 755 /home/$username/.config
+    sudo arch-chroot /mnt chmod -R 755 /home/$username/.cache
 
     log Instalation "Setting up pacman"
     sudo sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf

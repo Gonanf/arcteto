@@ -25,6 +25,13 @@ build-custom:
     echo "Building custom packages only..."
     ./build-custom-packages.fish
 
+upgrade:
+    #!/usr/bin/env fish
+    
+    echo "Upgrading custom packages..."
+    ./build-custom-packages.fish --upgrade
+
+
 run:
     #!/usr/bin/env fish
     
