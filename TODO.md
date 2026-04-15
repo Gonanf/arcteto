@@ -38,3 +38,4 @@
 [ ] Integrate Kateto (Opencode + Scripts + llama.cpp)
 [ ] Add the backup system
 [ ] Add the opencode and llama.cpp service
+[ ] Error: hyprland config line 366 source with a non existent file
