@@ -13,7 +13,9 @@
 [x] Separar custom_packages entre los de repositorios y los de AUR
 [x] Modificar build-custom-packages para utilizar el listado de packetes AUR e instalarlos
 [x] Copiar custom_db en airootfs/local/repo
-#Why do i sometimes talk in english? Because docs.
+
+# Why do i sometimes talk in english? Because docs
+
 [x] Error pacstrap: file not found /etc/vconsole.conf
 [x] Symlink /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf to /etc/fonts/conf.d/
 [x] Error: Mount point /boot which backs the random seed file is world accesible, which is a security hole
@@ -39,3 +41,4 @@
 [ ] Add the backup system
 [ ] Add the opencode and llama.cpp service
 [ ] Error: hyprland config line 366 source with a non existent file
+[ ] Add i2c, kernel module and ddcutil

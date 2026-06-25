@@ -8,3 +8,7 @@ custom-repo
 airootfs/local/repo
 **/wallpapers
 airootfs/root/Pictures
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json
