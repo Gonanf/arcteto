@@ -28,6 +28,7 @@ function arcteto-env
     set -l KILL_PROCS ""
     set -l SHARE_PATHS ""   # colon-separated host:guest mounts (bindfs map to USERNAME)
     set -l APPARMOR_DENY "" # comma-separated binaries to deny via AppArmor
+    set -l DESTROY ""       # --destroy <name> tears down a previously created env
     set -l ISOLATED 1  # create separate user by default
 
     # Parse flags
@@ -54,6 +55,8 @@ function arcteto-env
                 set SHARE_PATHS $argv[(math $i + 1)]; set i (math $i + 1)
             case --apparmor-deny
                 set APPARMOR_DENY $argv[(math $i + 1)]; set i (math $i + 1)
+            case --destroy
+                set DESTROY $argv[(math $i + 1)]; set i (math $i + 1)
             case --no-user
                 set ISOLATED 0
             case '*'
@@ -61,6 +64,31 @@ function arcteto-env
                 return 1
         end
         set i (math $i + 1)
+    end
+
+    # --- Destroy mode: tear down a previously created environment ---
+    if test -n "$DESTROY"
+        set -l N $DESTROY
+        # ponytail: best-effort teardown, ignore missing pieces (env may be partial)
+        sudo systemctl disable --now arcteto-$N-watchdog.service 2>/dev/null
+        sudo rm -f /etc/systemd/system/arcteto-$N-watchdog.service
+        sudo rm -f /usr/local/bin/arcteto-$N-watchdog
+        for p in (string split "," $APPARMOR_DENY)
+            sudo rm -f /etc/apparmor.d/arcteto-$N-(string trim $p) 2>/dev/null
+        end
+        sudo systemctl disable --now dnsmasq-$N.service 2>/dev/null
+        sudo rm -f /etc/systemd/system/dnsmasq-$N.service /etc/dnsmasq-$N.conf
+        sudo nft delete table inet $N 2>/dev/null
+        sudo sed -i "/include \"\/etc\/nftables-$N.conf\"/d" /etc/nftables.conf 2>/dev/null
+        sudo rm -f /etc/nftables-$N.conf
+        # unmount any bindfs shares (guess guest mount points under /home/*/share or known paths)
+        for m in (mount | string match -r "*$N*")
+            sudo umount -f $m 2>/dev/null
+        end
+        sudo rm -rf /etc/systemd/system/getty@tty*.service.d/override.conf 2>/dev/null
+        sudo userdel -r $N 2>/dev/null
+        _env_msg "Entorno '$N' destruido (best-effort)."
+        return 0
     end
 
     # --- Visual helpers (zenity if available, else CLI) ---
