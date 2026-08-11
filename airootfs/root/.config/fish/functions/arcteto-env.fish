@@ -288,9 +288,14 @@ WantedBy=multi-user.target" | sudo tee /etc/systemd/system/arcteto-$NAME-watchdo
         set -l HOST_UID (id -u (whoami))
         set -l GUEST_UID (id -u $USERNAME)
         for spec in (string split ":" $SHARE_PATHS)
-            set -l parts (string split "," $spec)
+            set -l parts (string split ":" $spec)
             set -l host $parts[1]
             set -l guest $parts[2]
+            # ponytail: never mount over the real chaos home; guest must live under the env user
+            if string match -q "/home/chaos/*" $guest
+                _env_msg "Error: el destino de --share no puede estar en /home/chaos (usá /home/$USERNAME/...)"
+                return 1
+            end
             test -z "$guest"; and set guest "/home/$USERNAME/share/(basename $host)"
             sudo mkdir -p $host $guest
             sudo bindfs --map=$HOST_UID/$GUEST_UID:@$HOST_UID/@$GUEST_UID $host $guest
