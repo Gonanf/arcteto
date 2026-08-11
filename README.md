@@ -139,22 +139,46 @@ The setup script is based of [Easy Arch](https://github.com/classy-giraffe/easy-
 
 See [TODO.md](TODO.md) for pending tasks.
 
-## FocusLock (commitment device)
+## Environment system (isolated TTYs)
 
-FocusLock turns Arcteto into a study machine with a real commitment device: when
-you start a study block, your main session (TTY1) locks with a passkey that only
-your agent (Hermes/Kateto) knows, and an isolated `study` user (TTY2) gets a
-filtered DNS that cannot reach YouTube, TikTok, Reddit, X, or known DoH servers.
+Arcteto can create **any isolated environment** on its own TTY: a filtered study
+box, a streaming rig, a gaming sandbox, a work profile — whatever you want. Each
+environment gets its own TTY (autologin), an optional separate user, optional
+filtered DNS (blocks arbitrary domains), and a set of autostart apps.
 
-### Components
+### Generic creator — `arcteto-env.fish`
 
-- **`focuslock-setup.fish`** — visual (zenity) automated installer. Creates the
-  `study` user, the `focuslock` PAM module, the hyprlock config, the filtered
-  dnsmasq, the nftables redirect, TTY2 autologin, and the sudoers chvt rule.
-  Run it once after installing Arcteto.
+Visual (zenity) automated creator. Run it and answer the prompts, or pass flags:
+
+```fish
+arcteto-env                                              # interactive (zenity)
+arcteto-env --name streaming --tty 3 --user stream \
+    --apps "obs affine" --wallpaper ~/Pictures/stream
+arcteto-env --name study --tty 2 --user study \
+    --dns "youtube.com,tiktok.com,reddit.com" --apps "zen affine"
+```
+
+Flags: `--name`, `--tty`, `--user` (isolated user; omit + `--no-user` for main
+user), `--dns` (comma-separated blocklist), `--apps` (space-separated),
+`--wallpaper` (dir), `--no-user` (use main user, no isolation).
+
+It generates per-environment:
+- a TTY with autologin (to the isolated user or main user)
+- optional separate user (UID 10xx, input/seat groups for mouse/keyboard)
+- optional filtered DNS via a per-environment dnsmasq (port `5335+TTY`) + nftables
+  redirect that drops DoT/QUIC
+- a Hyprland config with the requested autostart apps
+
+### FocusLock (commitment device) — built on top
+
+FocusLock is a specific use of the environment system plus a session lock:
+
+- **`focuslock-setup.fish`** — wrapper that calls `arcteto-env` with the study
+  params (TTY2, filtered DNS, zen + affine).
 - **`focuslock-engage.fish`** — run by the agent on TTY1 to start a study block:
   generates a random passkey, writes its SHA256 to the PAM secret, locks the
-  session via hyprlock, and shoves you to TTY2.
+  session via hyprlock (which uses PAM service `focuslock`), and shoves you to
+  TTY2. The passkey is custodied by the agent, not you — that's the commitment.
 - **`/etc/pam.d/focuslock`** + `/usr/local/bin/focuslock-check` — PAM stack that
   validates the agent's passkey (not your login password).
 - **`/etc/dnsmasq-focuslock.conf`** + `dnsmasq-focuslock.service` — filtered DNS
@@ -165,8 +189,9 @@ filtered DNS that cannot reach YouTube, TikTok, Reddit, X, or known DoH servers.
 ### Usage
 
 ```fish
-focuslock-setup     # one-time setup (asks via zenity)
-focuslock-engage    # agent activates a study block
+arcteto-env                       # create any environment (interactive)
+focuslock-setup                   # study environment (one-time)
+focuslock-engage                  # agent activates a study block
 ```
 
 The full design, all errors encountered, and the rationale are documented in
