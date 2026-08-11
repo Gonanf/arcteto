@@ -1,10 +1,21 @@
 function focuslock-engage
-    # FocusLock engage — run this on TTY1 (agent session) to start a study block.
-    # Generates a Hermes-only passkey, writes its SHA256 to the focuslock PAM secret,
-    # locks the session via hyprlock (which uses PAM service 'focuslock'), and shoves
-    # the user to TTY2 (study environment). Noctalia is NOT involved in the lock.
-    set -l STUDY_TTY 2
+    # FocusLock engage — run this on TTY1 (agent session) to start a focus block.
+    # Generates a Hermes-only passkey, writes its SHA256 to the focuslock PAM secret
+    # on the MAIN user (chaos), locks TTY1 via hyprlock (PAM service 'focuslock'),
+    # and shoves the user to the target TTY (study=2, work=4, ...). The locked env
+    # never knows the secret — unlock always happens back on TTY1.
+    set -l TARGET_TTY 2
     set -l AGENT_USER (whoami)
+
+    # allow override: focuslock-engage --tty 4  (for work)
+    set -l i 1
+    while test $i -le (count $argv)
+        switch $argv[$i]
+            case --tty
+                set TARGET_TTY $argv[(math $i + 1)]; set i (math $i + 1)
+        end
+        set i (math $i + 1)
+    end
 
     set -x DISPLAY (test -n "$DISPLAY"; and echo $DISPLAY; or echo :0)
     set -x WAYLAND_DISPLAY (test -n "$WAYLAND_DISPLAY"; and echo $WAYLAND_DISPLAY; or echo wayland-1)
@@ -30,8 +41,8 @@ function focuslock-engage
     hyprlock >/dev/null 2>&1 &
     sleep 2
 
-    # Shove the user to TTY2 (study environment). Requires the sudoers chvt rule.
-    sudo chvt $STUDY_TTY 2>/dev/null; or true
+    # Shove the user to the target TTY (study=2, work=4, ...). Requires sudoers chvt rule.
+    sudo chvt $TARGET_TTY 2>/dev/null; or true
 
-    notify-send "FocusLock ON" "Modo estudio. TTY1 lockeado. Passkey custodiada por Hermes."
+    notify-send "FocusLock ON" "Modo focus. TTY1 lockeado. Passkey custodiada por Hermes."
 end

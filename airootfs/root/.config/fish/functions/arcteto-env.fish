@@ -26,6 +26,8 @@ function arcteto-env
     set -l WALLPAPER_DIR ""
     set -l CLONE_FROM ""
     set -l KILL_PROCS ""
+    set -l SHARE_PATHS ""   # colon-separated host:guest mounts (bindfs map to USERNAME)
+    set -l APPARMOR_DENY "" # comma-separated binaries to deny via AppArmor
     set -l ISOLATED 1  # create separate user by default
 
     # Parse flags
@@ -48,6 +50,10 @@ function arcteto-env
                 set CLONE_FROM $argv[(math $i + 1)]; set i (math $i + 1)
             case --kill
                 set KILL_PROCS $argv[(math $i + 1)]; set i (math $i + 1)
+            case --share
+                set SHARE_PATHS $argv[(math $i + 1)]; set i (math $i + 1)
+            case --apparmor-deny
+                set APPARMOR_DENY $argv[(math $i + 1)]; set i (math $i + 1)
             case --no-user
                 set ISOLATED 0
             case '*'
@@ -258,6 +264,38 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/arcteto-$NAME-watchdog.service >/dev/null
         sudo systemctl enable --now arcteto-$NAME-watchdog.service
+    end
+
+    # --- 6. Shared paths via bindfs (host files appear owned by USERNAME, writable) ---
+    if test -n "$SHARE_PATHS"
+        # ponytail: ephemeral mount, no .mount unit (user said env is discardable)
+        if not command -v bindfs >/dev/null 2>&1
+            sudo pacman -S --noconfirm bindfs 2>/dev/null; or _env_msg "bindfs no disponible, instalalo para --share"
+        end
+        set -l HOST_UID (id -u (whoami))
+        set -l GUEST_UID (id -u $USERNAME)
+        for spec in (string split ":" $SHARE_PATHS)
+            set -l parts (string split "," $spec)
+            set -l host $parts[1]
+            set -l guest $parts[2]
+            test -z "$guest"; and set guest "/home/$USERNAME/share/(basename $host)"
+            sudo mkdir -p $host $guest
+            sudo bindfs --map=$HOST_UID/$GUEST_UID:@$HOST_UID/@$GUEST_UID $host $guest
+        end
+    end
+
+    # --- 7. AppArmor deny profiles for distraction binaries ---
+    if test -n "$APPARMOR_DENY"
+        for bin in (string split "," $APPARMOR_DENY)
+            set bin (string trim $bin)
+            test -z "$bin"; and continue
+            set -l path (command -v $bin 2>/dev/null; or echo "/usr/bin/$bin")
+            echo "# AppArmor deny profile for $bin (Arcteto env $NAME)
+$path {
+    deny /** w,
+}" | sudo tee /etc/apparmor.d/arcteto-$NAME-$bin >/dev/null
+            sudo apparmor_parser -r /etc/apparmor.d/arcteto-$NAME-$bin 2>/dev/null
+        end
     end
 
     set -l clone_msg (test -n "$CLONE_FROM"; and echo "Config clonada de: $CLONE_FROM"; or echo "")

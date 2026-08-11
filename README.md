@@ -180,8 +180,12 @@ FocusLock is a specific use of the environment system plus a session lock:
   `arcteto-env` with the right flags, e.g.:
   `arcteto-env --name work --tty 4 --user work --clone-from chaos
    --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com"
-   --kill "steam,lutris,wine,gamescope"`
-  No separate script needed — the generic engine covers it.
+   --kill "steam,lutris,wine,gamescope"
+   --share "/home/chaos/Descargas:/home/work/Descargas,/home/chaos/Documentos:/home/work/Documentos,/home/chaos/proyectos:/home/work/proyectos,/home/chaos/.config:/home/work/.config,/home/chaos/.cache:/home/work/.cache"
+   --apparmor-deny "steam"`
+  No separate script needed — the generic engine covers it. Shared paths use
+  bindfs so work writes files that chaos still owns. `--cache` minus huggingface/uv/bun
+  is a manual prune you do once after first boot of the work env.
 - **`focuslock-engage.fish`** — run by the agent on TTY1 to start a study block:
   generates a random passkey, writes its SHA256 to the PAM secret, locks the
   session via hyprlock (which uses PAM service `focuslock`), and shoves you to
@@ -201,8 +205,11 @@ focuslock-setup                   # study environment (one-time)
 # work environment: same engine, just flags:
 arcteto-env --name work --tty 4 --user work --clone-from chaos \
     --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com" \
-    --kill "steam,lutris,wine,gamescope"
-focuslock-engage                  # agent activates a study block
+    --kill "steam,lutris,wine,gamescope" \
+    --share "/home/chaos/Descargas:/home/work/Descargas,/home/chaos/Documentos:/home/work/Documentos,/home/chaos/proyectos:/home/work/proyectos,/home/chaos/.config:/home/work/.config,/home/chaos/.cache:/home/work/.cache" \
+    --apparmor-deny "steam"
+focuslock-engage                  # agent activates a study block (TTY1 -> TTY2)
+focuslock-engage --tty 4          # agent activates a work block (TTY1 -> TTY4)
 ```
 
 The full design, all errors encountered, and the rationale are documented in
