@@ -14,6 +14,7 @@ In the future it also will have [Kateto](Pending) witch will allow the distro to
 - Custom toolings and configs
 - Btrfs with snapper snapshots
 - AMD and Intel GPU tooling and drivers
+- **FocusLock**: isolated study environment (TTY2) with agent-custodied passkey lock and filtered DNS (see below)
 
 ## Project Status
 
@@ -137,6 +138,39 @@ The setup script is based of [Easy Arch](https://github.com/classy-giraffe/easy-
 ## TODO
 
 See [TODO.md](TODO.md) for pending tasks.
+
+## FocusLock (commitment device)
+
+FocusLock turns Arcteto into a study machine with a real commitment device: when
+you start a study block, your main session (TTY1) locks with a passkey that only
+your agent (Hermes/Kateto) knows, and an isolated `study` user (TTY2) gets a
+filtered DNS that cannot reach YouTube, TikTok, Reddit, X, or known DoH servers.
+
+### Components
+
+- **`focuslock-setup.fish`** — visual (zenity) automated installer. Creates the
+  `study` user, the `focuslock` PAM module, the hyprlock config, the filtered
+  dnsmasq, the nftables redirect, TTY2 autologin, and the sudoers chvt rule.
+  Run it once after installing Arcteto.
+- **`focuslock-engage.fish`** — run by the agent on TTY1 to start a study block:
+  generates a random passkey, writes its SHA256 to the PAM secret, locks the
+  session via hyprlock, and shoves you to TTY2.
+- **`/etc/pam.d/focuslock`** + `/usr/local/bin/focuslock-check` — PAM stack that
+  validates the agent's passkey (not your login password).
+- **`/etc/dnsmasq-focuslock.conf`** + `dnsmasq-focuslock.service` — filtered DNS
+  resolver on `127.0.0.1:5335`.
+- **`/etc/nftables-focuslock.conf`** — redirects `study`'s DNS to the filtered
+  resolver and drops DoT/QUIC.
+
+### Usage
+
+```fish
+focuslock-setup     # one-time setup (asks via zenity)
+focuslock-engage    # agent activates a study block
+```
+
+The full design, all errors encountered, and the rationale are documented in
+`../Blogs/arcteto-focuslock-kateto.md` (or the Arcteto blog).
 
 ## License
 

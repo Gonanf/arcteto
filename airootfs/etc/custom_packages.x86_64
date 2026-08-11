@@ -90,6 +90,10 @@ intel-gpu-tools
 ghostty
 fuzzel
 hyprpolkitagent
+hyprlock
+zenity
+nftables
+dnsmasq
 hyprsunset
 grim
 slurp
