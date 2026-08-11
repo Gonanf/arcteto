@@ -24,6 +24,8 @@ function arcteto-env
     set -l DNS_BLOCK ""
     set -l APPS ""
     set -l WALLPAPER_DIR ""
+    set -l CLONE_FROM ""
+    set -l KILL_PROCS ""
     set -l ISOLATED 1  # create separate user by default
 
     # Parse flags
@@ -42,6 +44,10 @@ function arcteto-env
                 set APPS $argv[(math $i + 1)]; set i (math $i + 1)
             case --wallpaper
                 set WALLPAPER_DIR $argv[(math $i + 1)]; set i (math $i + 1)
+            case --clone-from
+                set CLONE_FROM $argv[(math $i + 1)]; set i (math $i + 1)
+            case --kill
+                set KILL_PROCS $argv[(math $i + 1)]; set i (math $i + 1)
             case --no-user
                 set ISOLATED 0
             case '*'
@@ -93,6 +99,8 @@ function arcteto-env
         set DNS_BLOCK (_env_list "Dominios a bloquear en el DNS (separados por coma, ej: youtube.com,tiktok.com):" "youtube.com,reddit.com,x.com,twitter.com,tiktok.com" "")
         set APPS (_env_entry "Apps de autostart (separadas por espacio, ej: zen affine):" $APPS)
         set WALLPAPER_DIR (_env_entry "Directorio de wallpapers (opcional):" $WALLPAPER_DIR)
+        set CLONE_FROM (_env_entry "Clonar config desde otro usuario (dejar vacío para no clonar):" $CLONE_FROM)
+        set KILL_PROCS (_env_entry "Procesos a matar si aparecen (ej: steam,lutris,wine; vacío = ninguno):" $KILL_PROCS)
     end
 
     # If no isolated user specified, use the calling user for autologin
@@ -115,6 +123,21 @@ function arcteto-env
         sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.local/state/focuslock
         sudo usermod -aG input,video,seat,tty $USERNAME
         sudo systemctl enable --now seatd 2>/dev/null
+    end
+
+    # --- 1b. Clone config from another user (so the env "starts as you") ---
+    if test -n "$CLONE_FROM"
+        _env_msg "Clonando config de '$CLONE_FROM' a '$USERNAME'..."
+        sudo mkdir -p /home/$USERNAME/.config /home/$USERNAME/.local /home/$USERNAME/.cache
+        if not test -e /home/$USERNAME/.config/hypr
+            sudo cp -r /home/$CLONE_FROM/.config/* /home/$USERNAME/.config/ 2>/dev/null
+        end
+        if not test -e /home/$USERNAME/.local/state
+            sudo cp -r /home/$CLONE_FROM/.local/* /home/$USERNAME/.local/ 2>/dev/null
+        end
+        # Remove any focuslock engage/unlock binds from the cloned config (the agent lock is separate)
+        sudo sed -i '/focuslock.sh/d; /focusunlock.sh/d' /home/$USERNAME/.config/hypr/hyprland.conf 2>/dev/null
+        sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.config /home/$USERNAME/.local /home/$USERNAME/.cache
     end
 
     # --- 2. Filtered DNS (per-environment dnsmasq + nftables) ---
@@ -209,5 +232,45 @@ ExecStart=-/usr/bin/agetty -a $USERNAME --noclear %I \$TERM" | sudo tee /etc/sys
     sudo systemctl daemon-reload
     sudo systemctl restart getty@tty$TTY
 
-    _env_msg "Entorno '$NAME' creado.\n\nTTY: $TTY (autologin: $USERNAME)\nDNS: "(test -n "$DNS_BLOCK"; and echo "filtrado en :$DNS_PORT"; or echo "sin filtro")"\nApps: $APPS\n\nPara entrar: Ctrl+Alt+F$TTY"
+    # --- 5. Watchdog: kill distraction processes in this environment's session ---
+    if test -n "$KILL_PROCS"
+        echo "#!/usr/bin/env bash
+# Arcteto Env ($NAME) watchdog — kills distraction processes in the session.
+while true; do" | sudo tee /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+        for p in (string split "," $KILL_PROCS)
+            set p (string trim $p)
+            test -n "$p"; and echo "    pkill -u $USERNAME -f '$p' 2>/dev/null" | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+        end
+        echo "    sleep 5
+done" | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+        sudo chmod 755 /usr/local/bin/arcteto-$NAME-watchdog
+
+        echo "[Unit]
+Description=Arcteto Env ($NAME) watchdog (kills $KILL_PROCS)
+After=graphical.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/arcteto-$NAME-watchdog
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/arcteto-$NAME-watchdog.service >/dev/null
+        sudo systemctl enable --now arcteto-$NAME-watchdog.service
+    end
+
+    set -l clone_msg (test -n "$CLONE_FROM"; and echo "Config clonada de: $CLONE_FROM"; or echo "")
+    set -l kill_msg (test -n "$KILL_PROCS"; and echo "Watchdog mata: $KILL_PROCS"; or echo "")
+    set -l dns_msg (test -n "$DNS_BLOCK"; and echo "filtrado en :$DNS_PORT"; or echo "sin filtro")
+    set -l apps_msg (test -n "$APPS"; and echo "$APPS"; or echo "ninguna")
+    _env_msg "Entorno '$NAME' creado.
+
+TTY: $TTY (autologin: $USERNAME)
+DNS: $dns_msg
+Apps: $apps_msg
+$clone_msg
+$kill_msg
+
+Para entrar: Ctrl+Alt+F$TTY"
 end

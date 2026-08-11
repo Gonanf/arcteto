@@ -175,6 +175,13 @@ FocusLock is a specific use of the environment system plus a session lock:
 
 - **`focuslock-setup.fish`** — wrapper that calls `arcteto-env` with the study
   params (TTY2, filtered DNS, zen + affine).
+- **`arcteto-work` example** — the "work" environment (starts with your cloned
+  config, blocks YouTube/social/Steam, kills games) is just a call to
+  `arcteto-env` with the right flags, e.g.:
+  `arcteto-env --name work --tty 4 --user work --clone-from chaos
+   --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com"
+   --kill "steam,lutris,wine,gamescope"`
+  No separate script needed — the generic engine covers it.
 - **`focuslock-engage.fish`** — run by the agent on TTY1 to start a study block:
   generates a random passkey, writes its SHA256 to the PAM secret, locks the
   session via hyprlock (which uses PAM service `focuslock`), and shoves you to
@@ -191,6 +198,10 @@ FocusLock is a specific use of the environment system plus a session lock:
 ```fish
 arcteto-env                       # create any environment (interactive)
 focuslock-setup                   # study environment (one-time)
+# work environment: same engine, just flags:
+arcteto-env --name work --tty 4 --user work --clone-from chaos \
+    --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com" \
+    --kill "steam,lutris,wine,gamescope"
 focuslock-engage                  # agent activates a study block
 ```
 
