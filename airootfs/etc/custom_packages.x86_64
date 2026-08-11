@@ -94,6 +94,8 @@ hyprlock
 zenity
 nftables
 dnsmasq
+bindfs
+apparmor
 hyprsunset
 grim
 slurp

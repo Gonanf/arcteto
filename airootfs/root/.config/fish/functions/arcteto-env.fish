@@ -1,3 +1,5 @@
+#!/usr/bin/fish
+
 function arcteto-env
     # Arcteto isolated environment creator — visual (zenity) automated setup.
     #
@@ -26,37 +28,48 @@ function arcteto-env
     set -l WALLPAPER_DIR ""
     set -l CLONE_FROM ""
     set -l KILL_PROCS ""
-    set -l SHARE_PATHS ""   # colon-separated host:guest mounts (bindfs map to USERNAME)
+    set -l SHARE_PATHS "" # colon-separated host:guest mounts (bindfs map to USERNAME)
     set -l APPARMOR_DENY "" # comma-separated binaries to deny via AppArmor
-    set -l DESTROY ""       # --destroy <name> tears down a previously created env
-    set -l ISOLATED 1  # create separate user by default
+    set -l DESTROY "" # --destroy <name> tears down a previously created env
+    set -l ISOLATED 1 # create separate user by default
 
     # Parse flags
     set -l i 1
     while test $i -le (count $argv)
         switch $argv[$i]
             case --name
-                set NAME $argv[(math $i + 1)]; set i (math $i + 1)
+                set NAME $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --tty
-                set TTY $argv[(math $i + 1)]; set i (math $i + 1)
+                set TTY $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --user
-                set USERNAME $argv[(math $i + 1)]; set i (math $i + 1)
+                set USERNAME $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --dns
-                set DNS_BLOCK $argv[(math $i + 1)]; set i (math $i + 1)
+                set DNS_BLOCK $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --apps
-                set APPS $argv[(math $i + 1)]; set i (math $i + 1)
+                set APPS $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --wallpaper
-                set WALLPAPER_DIR $argv[(math $i + 1)]; set i (math $i + 1)
+                set WALLPAPER_DIR $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --clone-from
-                set CLONE_FROM $argv[(math $i + 1)]; set i (math $i + 1)
+                set CLONE_FROM $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --kill
-                set KILL_PROCS $argv[(math $i + 1)]; set i (math $i + 1)
+                set KILL_PROCS $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --share
-                set SHARE_PATHS $argv[(math $i + 1)]; set i (math $i + 1)
+                set SHARE_PATHS $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --apparmor-deny
-                set APPARMOR_DENY $argv[(math $i + 1)]; set i (math $i + 1)
+                set APPARMOR_DENY $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --destroy
-                set DESTROY $argv[(math $i + 1)]; set i (math $i + 1)
+                set DESTROY $argv[(math $i + 1)]
+                set i (math $i + 1)
             case --no-user
                 set ISOLATED 0
             case '*'
@@ -104,14 +117,17 @@ function arcteto-env
             zenity --question --title "Arcteto Env" --text "$argv[1]" --width 420 2>/dev/null
             return $status
         else
-            read -P "Arcteto Env: $argv[1] [y/N] " -l a; test "$a" = y; and return 0; or return 1
+            read -P "Arcteto Env: $argv[1] [y/N] " -l a
+            test "$a" = y; and return 0; or return 1
         end
     end
     function _env_entry
         if command -v zenity >/dev/null 2>&1
             zenity --entry --title "Arcteto Env" --text "$argv[1]" --entry-text "$argv[2]" --width 420 2>/dev/null
         else
-            echo -n "Arcteto Env: $argv[1] ($argv[2]): "; read -l v; test -n "$v"; and echo $v; or echo $argv[2]
+            echo -n "Arcteto Env: $argv[1] ($argv[2]): "
+            read -l v
+            test -n "$v"; and echo $v; or echo $argv[2]
         end
     end
     function _env_list
@@ -119,7 +135,9 @@ function arcteto-env
         if command -v zenity >/dev/null 2>&1
             zenity --entry --title "Arcteto Env" --text "$argv[1]\n(Opciones: $argv[2])" --entry-text "$argv[3]" --width 420 2>/dev/null
         else
-            echo -n "Arcteto Env: $argv[1] ($argv[3]): "; read -l v; test -n "$v"; and echo $v; or echo $argv[3]
+            echo -n "Arcteto Env: $argv[1] ($argv[3]): "
+            read -l v
+            test -n "$v"; and echo $v; or echo $argv[3]
         end
     end
 
@@ -143,7 +161,7 @@ function arcteto-env
         set ISOLATED 0
     end
 
-    set -l DNS_PORT (math 5335 + $TTY)  # unique port per environment
+    set -l DNS_PORT (math 5335 + $TTY) # unique port per environment
     set -l AGENT_USER (whoami)
 
     _env_msg "Creando entorno '$NAME' en TTY$TTY\nUsuario: $USERNAME\nDNS bloqueado: "(test -n "$DNS_BLOCK"; and echo "$DNS_BLOCK"; or echo "ninguno")"\nApps: "(test -n "$APPS"; and echo "$APPS"; or echo "ninguna")""
@@ -197,39 +215,9 @@ address=/dns.google/0.0.0.0
 address=/cloudflare-dns.com/0.0.0.0
 address=/dns.quad9.net/0.0.0.0" | sudo tee $dnsmasq_conf >/dev/null
 
-        echo "[Unit]
-Description=Arcteto Env ($NAME) DNSmasq
-After=network-online.target
-Wants=network-online.target
+        printf '[Unit]\nDescription=Arcteto Env (%s) DNSmasq\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nType=simple\nExecStartPre=/usr/bin/bash -c "pkill -f '"'"'dnsmasq.*%s'"'"' 2>/dev/null || true"\nExecStart=/usr/bin/dnsmasq -k -C %s\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n' $NAME $DNS_PORT $dnsmasq_conf | sudo tee $dnsmasq_svc >/dev/null
 
-[Service]
-Type=simple
-ExecStartPre=/usr/bin/bash -c "pkill -f \"dnsmasq.*$DNS_PORT\" 2>/dev/null || true"
-ExecStart=/usr/bin/dnsmasq -k -C $dnsmasq_conf
-Restart=on-failure
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target" | sudo tee $dnsmasq_svc >/dev/null
-
-        echo "table inet $NAME;
-delete table inet $NAME;
-
-table inet $NAME {
-    chain output_nat {
-        type nat; hook output; priority dstnat; policy accept;
-        meta skuid $STUDY_UID udp dport 53 dnat ip to 127.0.0.1:$DNS_PORT
-        meta skuid $STUDY_UID tcp dport 53 dnat ip to 127.0.0.1:$DNS_PORT
-    }
-
-    chain output_filter {
-        type filter; hook output; priority filter; policy accept;
-        meta skuid $STUDY_UID oif \"lo\" accept
-        meta skuid $STUDY_UID tcp dport 853 drop
-        meta skuid $STUDY_UID udp dport 853 drop
-        meta skuid $STUDY_UID udp dport 443 drop
-    }
-}" | sudo tee $nft_conf >/dev/null
+        printf 'table inet %s;\ndelete table inet %s;\n\ntable inet %s {\n    chain output_nat {\n        type nat hook output priority dstnat; policy accept;\n        meta skuid %s udp dport 53 dnat ip to 127.0.0.1:%s\n        meta skuid %s tcp dport 53 dnat ip to 127.0.0.1:%s\n    }\n\n    chain output_filter {\n        type filter hook output priority filter; policy accept;\n        meta skuid %s oif "lo" accept\n        meta skuid %s tcp dport 853 drop\n        meta skuid %s udp dport 853 drop\n        meta skuid %s udp dport 443 drop\n    }\n}\n' $NAME $NAME $NAME $STUDY_UID $DNS_PORT $STUDY_UID $DNS_PORT $STUDY_UID $STUDY_UID $STUDY_UID $STUDY_UID | sudo tee $nft_conf >/dev/null
 
         sudo nft -f $nft_conf
         if not grep -q "include \"$nft_conf\"" /etc/nftables.conf 2>/dev/null
@@ -268,15 +256,12 @@ ExecStart=-/usr/bin/agetty -a $USERNAME --noclear %I \$TERM" | sudo tee /etc/sys
 
     # --- 5. Watchdog: kill distraction processes in this environment's session ---
     if test -n "$KILL_PROCS"
-        echo "#!/usr/bin/env bash
-# Arcteto Env ($NAME) watchdog — kills distraction processes in the session.
-while true; do" | sudo tee /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+        printf '#!/usr/bin/env bash\n# Arcteto Env (%s) watchdog — kills distraction processes in the session.\nwhile true; do\n' $NAME | sudo tee /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
         for p in (string split "," $KILL_PROCS)
             set p (string trim $p)
-            test -n "$p"; and echo "    pkill -u $USERNAME -f '$p' 2>/dev/null" | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+            test -n "$p"; and printf '    pkill -u %s -f '"'"'%s'"'"' 2>/dev/null\n' $USERNAME $p | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
         end
-        echo "    sleep 5
-done" | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
+        printf '    sleep 5\ndone\n' | sudo tee -a /usr/local/bin/arcteto-$NAME-watchdog >/dev/null
         sudo chmod 755 /usr/local/bin/arcteto-$NAME-watchdog
 
         echo "[Unit]
@@ -314,14 +299,12 @@ WantedBy=multi-user.target" | sudo tee /etc/systemd/system/arcteto-$NAME-watchdo
 
     # --- 7. AppArmor deny profiles for distraction binaries ---
     if test -n "$APPARMOR_DENY"
+        sudo mkdir -p /etc/apparmor.d
         for bin in (string split "," $APPARMOR_DENY)
             set bin (string trim $bin)
             test -z "$bin"; and continue
             set -l path (command -v $bin 2>/dev/null; or echo "/usr/bin/$bin")
-            echo "# AppArmor deny profile for $bin (Arcteto env $NAME)
-$path {
-    deny /** w,
-}" | sudo tee /etc/apparmor.d/arcteto-$NAME-$bin >/dev/null
+            printf '# AppArmor deny profile for %s (Arcteto env %s)\n%s {\n    deny /** w,\n}\n' $bin $NAME $path | sudo tee /etc/apparmor.d/arcteto-$NAME-$bin >/dev/null
             sudo apparmor_parser -r /etc/apparmor.d/arcteto-$NAME-$bin 2>/dev/null
         end
     end
