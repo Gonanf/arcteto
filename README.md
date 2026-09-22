@@ -1,220 +1,122 @@
-# ArcTeto
+<p align="center">
+  <img src="assets/banner.png" alt="arcteto" width="100%">
+</p>
 
-Custom Arch Linux ISO with Hyprland, Noctalia Shell, and developer tools.
-This was made as a checkpoint for my own distro, it contains my scripts, configs and setup, and because of that *it is not made to be easy*.
+<h1 align="center">arcteto</h1>
 
-In the future it also will have [Kateto](Pending) witch will allow the distro to be (optionally) fully agentic.
+<p align="center"><b>ISO live de Arch Linux personal, con Hyprland, Noctalia Shell, entornos aislados por TTY y FocusLock — hecha para el propio autor, no para ser fácil.</b></p>
 
-## Features
+<p align="center">
+  <img alt="estado" src="https://img.shields.io/badge/estado-activo-6f42c1">
+  <img alt="lenguaje" src="https://img.shields.io/badge/fish_%2B_archiso--4f8cc9">
+  <img alt="licencia" src="https://img.shields.io/badge/licencia-GPL--3.0-blue">
+  <img alt="última actividad" src="https://img.shields.io/badge/ultima_actividad-2026--08-lightgrey">
+</p>
 
-- Hyprland window manager
-- Noctalia Shell desktop environment
-- Fish shell with custom configuration
-- Developer tools (rust, python, bun, docker, etc.)
-- Custom toolings and configs
-- Btrfs with snapper snapshots
-- AMD and Intel GPU tooling and drivers
-- **FocusLock**: isolated study environment (TTY2) with agent-custodied passkey lock and filtered DNS (see below)
+---
 
-## Project Status
+## Qué es
 
-Functional (?), only for UEFI systems
+Un perfil de [archiso](https://gitlab.archlinux.org/archlinux/archiso) que compila una ISO live booteable de Arch Linux con el setup completo del autor: Hyprland + Noctalia Shell, fish como shell, toolchain de desarrollo (rust, python, bun, docker), Btrfs con snapshots de snapper, drivers y tooling de GPU AMD/Intel, e instalación guiada al disco. Incluye además un sistema de **entornos aislados por TTY** (`arcteto-env`) y **FocusLock**, un mecanismo de compromiso para estudio donde un agente custodia la contraseña de desbloqueo.
 
-## Building
+**En una frase:** el checkpoint instalable de la distro personal de Gabriel — lo que él bootea, no un producto para terceros.
 
-This project uses [Just](https://github.com/casey/just) as a command runner. Available commands:
+## Estado
 
-### Using Just (recommended):
-```bash
-just build           # Build ISO only (with custom packages)
-just build-no-custom # Build ISO without custom packages
-just build-run       # Build and run ISO in QEMU
-just run             # Run already built ISO
-just build-custom    # Build custom packages only
-```
+| | |
+|---|---|
+| **Estado** | activo |
+| **Última actividad** | 2026-08 (commit `690010e`, fix de `--share` en `arcteto-env`) |
+| **Se puede usar hoy** | sí, como ISO propia del autor: `just build` la compila y `just run` la prueba en QEMU (instalación apuntada a UEFI) |
+| **Lo que falta** | ver [TODO.md](TODO.md): tests automatizados en QEMU, integración de Kateto (agente con opencode + llama.cpp), sistema de backups, bindings de tooling Noctalia (OCR, palette scanner), reorganizar scripts en subcarpetas, docs |
+| **Riesgos / deuda conocida** | el repo local de paquetes custom en `/local/repo` puede dar problemas (notado en el README original); error conocido en el config de Hyprland (línea 366, source de archivo inexistente); la build corre `su -c` para mkarchiso |
 
-### Using fish scripts directly:
-```bash
-./build.fish                    # Build and run ISO (with custom packages)
-./build.fish --no-run           # Build (The iso) only
-./build.fish --no-custom        # Build (The iso) without custom packages
-./start_emu.fish                # Run already built ISO
-./build-custom-packages.fish    # Build AUR packages only
-```
+## Por qué existe
 
-### Custom Packages
-The ISO includes a small AUR repository at `/local/repo`.
-This could give problems in the future (//!Noted)
-
-These packages are automatically built during ISO creation and included in the custom repository. The repository is configured in `pacman.conf`
-
-## Running in QEMU
-
-### Using Just:
-```bash
-just run
-```
-
-### Using fish script directly:
-```bash
-./start_emu.fish
-```
-
-Requires QEMU with KVM acceleration and OVMF firmware.
-
-### Variables
-You can export these variables like this, and will modify the QEMU VM:
-set -U {name} {value}
-
-| Variable             | Description                                  | Default value |
-|----------------------|----------------------------------------------|---------------|
-| ARCTETO_ISO_PATH     | What file will be used for the VM filesystem | ./temp.raw    |
-| ARCTETO_MEMORY       | Size of RAM for the VM                       | 16G           |
-| ARCTETO_SIZE         | Disk spaced used by $ARCTETO_ISO_PATH        | 50G           |
-| ARCTETO_EXTRA_PARAMS | Extra parameter for QEMU                     | -accel kvm    |
+Es el punto de control (checkpoint) de la distro personal del autor: una ISO que reproduzca su setup — scripts, configs, herramientas — para reinstalar sin rehacer todo a mano. No nació como distribución para terceros y lo dice explícitamente: *"it is not made to be easy"*. A futuro, Kateto la haría opcionalmente "fully agentic".
 
 
-## Customization
+## Instalación y uso
 
-- Edit `airootfs/etc/custom_packages.x86_64` to add/remove packages from the official Arch repo.
-- Edit `airootfs/etc/aur_packages.x86_64` to add/remove packages from the AUR.
-- Edit `airootfs/root/.config` for user configuration (Hyprland, Noctalia, Fish).
-- Adjust `profiledef.sh` for ISO metadata.
-
-
-- Bring your own Wallpapers!, put them on `~/Imágenes/Wallpapers/` or copy them into `./airootfs/root/Imágenes/Wallpapers`
-- Bring your own Configs!, put the paths on `configs.d` or copy them into `./airootfs/root/.config/`
-
-## Installation
-
-The ISO includes a guided installation script (`setup.fish`) that sets up:
-- Btrfs subvolumes (@, @root, @home, @snapshots)
-- Snapper snapshots
-- Custom config and packages
-- Custom tools and shortcuts
-- Systemd‑boot as bootloader
-- Automatic login to Hyprland
-
-## Testing
-
-### Using Just:
-```bash
-just test          # Run all tests
-just test-simple   # Run basic file checks
-just test-syntax   # Test fish functions syntax
-just test-config   # Test configuration files
-just test-install  # Test installation scripts
-just test-deps     # Test build dependencies
-```
-
-### Using fish scripts directly:
-```bash
-./tests/run_all_tests.fish   # Run all tests
-./tests/test_simple.fish     # Basic file checks
-# ... other test files in tests/ directory
-```
-
-Tests include:
-- Essential file existence checks
-- Script syntax validation
-- Configuration file syntax (JSON, shell)
-- Package list validation (duplicates)
-- Installation script structure
-- Build dependency verification
-
-## Development Commands
+Requisitos: Arch Linux (o similar) con `archiso`, `fish` y [just](https://github.com/casey/just); QEMU con KVM y firmware OVMF para probar. Los wallpapers propios van en `~/Imágenes/Wallpapers/` (el build los copia); configs propias listadas en `configs.d`.
 
 ```bash
-just               # Show all available commands
-just clean         # Clean build artifacts (out/, archiso-tmp/, etc.)
-just sync-configs  # Sync configs from user home to project
-just install-deps  # Show dependency installation instructions
-just help          # Show help
+git clone https://github.com/Gonanf/arcteto.git
+cd arcteto
+just build            # compila la ISO (con paquetes custom)
+just build-run        # compila y arranca en QEMU
+just run              # corre una ISO ya compilada
+just build-no-custom  # compila sin el repo de paquetes custom
+just clean            # borra artefactos (out/, archiso-tmp/, ...)
 ```
 
-## Attribution
-The setup script is based of [Easy Arch](https://github.com/classy-giraffe/easy-arch/tree/main).
+Variables persistentes de fish (`set -U`) que ajustan la VM de QEMU:
 
-## TODO
+| Variable | Descripción | Default |
+|---|---|---|
+| `ARCTETO_ISO_PATH` | archivo usado como disco de la VM | `./temp.raw` |
+| `ARCTETO_MEMORY` | RAM de la VM | `16G` |
+| `ARCTETO_SIZE` | tamaño de disco en `$ARCTETO_ISO_PATH` | `50G` |
+| `ARCTETO_EXTRA_PARAMS` | parámetros extra de QEMU | `-accel kvm` |
 
-See [TODO.md](TODO.md) for pending tasks.
+Dentro del live, la instalación guiada (`setup.fish`) configura Btrfs con subvolumes (@, @root, @home, @snapshots), snapper, systemd-boot, los paquetes custom y autologin a Hyprland.
 
-## Environment system (isolated TTYs)
+## Entornos aislados y FocusLock
 
-Arcteto can create **any isolated environment** on its own TTY: a filtered study
-box, a streaming rig, a gaming sandbox, a work profile — whatever you want. Each
-environment gets its own TTY (autologin), an optional separate user, optional
-filtered DNS (blocks arbitrary domains), and a set of autostart apps.
-
-### Generic creator — `arcteto-env.fish`
-
-Visual (zenity) automated creator. Run it and answer the prompts, or pass flags:
+`arcteto-env` crea un entorno aislado en un TTY propio: autologin a un usuario separado opcional (UID 10xx con grupos input/seat), DNS filtrado opcional (dnsmasq por entorno en `5335+TTY` + nftables que tira DoT/QUIC), apps de autostart y config de Hyprland propia del entorno.
 
 ```fish
-arcteto-env                                              # interactive (zenity)
-arcteto-env --name streaming --tty 3 --user stream \
-    --apps "obs affine" --wallpaper ~/Pictures/stream
+arcteto-env                       # interactivo (zenity)
 arcteto-env --name study --tty 2 --user study \
     --dns "youtube.com,tiktok.com,reddit.com" --apps "zen affine"
 ```
 
-Flags: `--name`, `--tty`, `--user` (isolated user; omit + `--no-user` for main
-user), `--dns` (comma-separated blocklist), `--apps` (space-separated),
-`--wallpaper` (dir), `--no-user` (use main user, no isolation).
+Flags: `--name`, `--tty`, `--user` (usuario aislado; sin él + `--no-user` usa el usuario principal), `--dns` (blocklist separada por comas), `--apps` (separada por espacios), `--wallpaper`, `--no-user`, `--clone-from`, `--kill`, `--share` (bindfs), `--apparmor-deny`.
 
-It generates per-environment:
-- a TTY with autologin (to the isolated user or main user)
-- optional separate user (UID 10xx, input/seat groups for mouse/keyboard)
-- optional filtered DNS via a per-environment dnsmasq (port `5335+TTY`) + nftables
-  redirect that drops DoT/QUIC
-- a Hyprland config with the requested autostart apps
+**FocusLock** es un uso específico de ese sistema + un lock de sesión: `focuslock-engage` genera una passkey aleatoria, guarda su SHA256 en el secret de PAM, bloquea la sesión con hyprlock (servicio PAM `focuslock`) y te manda al TTY2 de estudio. La passkey la custodia el agente, no vos — ese es el compromiso. Piezas: `focuslock-setup.fish`, `focuslock-engage.fish`, `/etc/pam.d/focuslock` + `focuslock-check`, `/etc/dnsmasq-focuslock.conf` + servicio, `/etc/nftables-focuslock.conf`. El diseño completo y la rationale están en el blog del autor.
 
-### FocusLock (commitment device) — built on top
+## Stack
 
-FocusLock is a specific use of the environment system plus a session lock:
+- **Lenguaje / runtime:** fish (scripts y funciones de sistema), bash para el perfil archiso, [just](https://github.com/casey/just) como task runner
+- **Base:** archiso (perfil propio derivado de `releng`)
+- **Escritorio:** Hyprland, Noctalia Shell, fuzzel, ghostty, pipewire
+- **Infra / servicios:** dnsmasq + nftables (DNS filtrado), bindfs (shares), apparmor, snapper, systemd-boot
+- **AUR:** noctalia-shell, noctalia-qs, zen-browser-bin, paru, rocm-smi (repo custom en `/local/repo`)
 
-- **`focuslock-setup.fish`** — wrapper that calls `arcteto-env` with the study
-  params (TTY2, filtered DNS, zen + affine).
-- **`arcteto-work` example** — the "work" environment (starts with your cloned
-  config, blocks YouTube/social/Steam, kills games) is just a call to
-  `arcteto-env` with the right flags, e.g.:
-  `arcteto-env --name work --tty 4 --user work --clone-from chaos
-   --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com"
-   --kill "steam,lutris,wine,gamescope"
-   --share "/home/chaos/Descargas:/home/work/Descargas,/home/chaos/Documentos:/home/work/Documentos,/home/chaos/proyectos:/home/work/proyectos,/home/chaos/.config:/home/work/.config,/home/chaos/.cache:/home/work/.cache"
-   --apparmor-deny "steam"`
-  No separate script needed — the generic engine covers it. Shared paths use
-  bindfs so work writes files that chaos still owns. `--cache` minus huggingface/uv/bun
-  is a manual prune you do once after first boot of the work env.
-- **`focuslock-engage.fish`** — run by the agent on TTY1 to start a study block:
-  generates a random passkey, writes its SHA256 to the PAM secret, locks the
-  session via hyprlock (which uses PAM service `focuslock`), and shoves you to
-  TTY2. The passkey is custodied by the agent, not you — that's the commitment.
-- **`/etc/pam.d/focuslock`** + `/usr/local/bin/focuslock-check` — PAM stack that
-  validates the agent's passkey (not your login password).
-- **`/etc/dnsmasq-focuslock.conf`** + `dnsmasq-focuslock.service` — filtered DNS
-  resolver on `127.0.0.1:5335`.
-- **`/etc/nftables-focuslock.conf`** — redirects `study`'s DNS to the filtered
-  resolver and drops DoT/QUIC.
+## Estructura del repo
 
-### Usage
-
-```fish
-arcteto-env                       # create any environment (interactive)
-focuslock-setup                   # study environment (one-time)
-# work environment: same engine, just flags:
-arcteto-env --name work --tty 4 --user work --clone-from chaos \
-    --dns "youtube.com,reddit.com,x.com,twitter.com,tiktok.com,steamcommunity.com,steampowered.com" \
-    --kill "steam,lutris,wine,gamescope" \
-    --share "/home/chaos/Descargas:/home/work/Descargas,/home/chaos/Documentos:/home/work/Documentos,/home/chaos/proyectos:/home/work/proyectos,/home/chaos/.config:/home/work/.config,/home/chaos/.cache:/home/work/.cache" \
-    --apparmor-deny "steam"
-focuslock-engage                  # agent activates a study block (TTY1 -> TTY2)
-focuslock-engage --tty 4          # agent activates a work block (TTY1 -> TTY4)
+```
+airootfs/                        # overlay del sistema live: /etc, configs de usuario, scripts
+airootfs/root/.config/fish/      # funciones: setup, arcteto_install, arcteto-env, focuslock-*, ...
+build.fish                       # wrapper de mkarchiso (+ build de paquetes custom)
+build-custom-packages.fish       # compila los paquetes de AUR al repo local
+start_emu.fish                   # corre la ISO en QEMU
+test_disk.fish                   # prueba el disco virtual
+Justfile                         # tasks (build, run, test, clean, ...)
+packages.x86_64                  # se regenera en el build (releng + custom + AUR)
+profiledef.sh                    # metadata y bootmodes de la ISO
+pacman.conf                      # repos para el build, incluye el custom
+tests/                           # suite de tests en fish (sintaxis, configs, deps, instalación)
+TODO.md                          # pendientes y errores conocidos
 ```
 
-The full design, all errors encountered, and the rationale are documented in
-`../Blogs/arcteto-focuslock-kateto.md` (or the Arcteto blog).
+## Roadmap
 
-## License
+- [ ] Integrar Kateto (opencode + scripts + llama.cpp) y sus servicios
+- [ ] Tests automatizados en QEMU
+- [ ] Sistema de backups
+- [ ] Bindings de tooling Noctalia (OCR, palette scanner)
+- [x] Sistema genérico de entornos por TTY (`arcteto-env`)
+- [x] FocusLock con custodia de passkey por el agente
+- [x] Repo de paquetes custom/AUR integrado al build
 
-GPLv3
+## Notas y decisiones
+
+- Perfil derivado del `releng` oficial de archiso: se heredan bootmodes BIOS+UEFI y hooks; el valor diferencial está en el overlay de `airootfs/` y los scripts de fish.
+- El setup de instalación está basado en [Easy Arch](https://github.com/classy-giraffe/easy-arch) (Btrfs + subvolumes + snapper).
+- El repo de paquetes AUR custom se compila en el build y se sirve desde `/local/repo` via pacman; el propio README original advierte que puede dar problemas.
+- Los wallpapers NO van al repo (`.gitignore` los excluye); se levantan de `~/Imágenes/Wallpapers/` en cada build.
+
+## Licencia
+
+GPLv3 (según el README original del repo).
